@@ -1,0 +1,16 @@
+{% extends 'forum/base.html' %}
+{% block title %}categories{% endblock title %}
+<!-- block to update value property of element -->
+{% block value %}value="category"{% endblock value %}
+{% block content %}
+<ul id="search-results">
+    {% if categories %}
+        {% for category in categories %}
+        <li><a href="{% url 'threads' category.slug %}">
+                    {{ category.name }}</a></li>
+        {% endfor %}
+    {% else %}
+        <li><p>There are no categories to display.</p></li>
+    {% endif %}
+</ul>
+{% endblock content %}

@@ -1,0 +1,14 @@
+{% extends 'forum/base.html' %}
+{% block title %} threads{% endblock title %}
+<!-- block to update value property of element -->
+{% block value %}value="thread"{% endblock value %}
+{% block content %}
+{% if threads %}
+<ul id="search-results">
+    {% for thread in threads %}
+    <li><a href="{% url 'thread' thread.slug %}">
+                {{ thread.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock content %}

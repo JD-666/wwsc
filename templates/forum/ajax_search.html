@@ -1,0 +1,19 @@
+{% if results.count > 0%}
+    {% if object == 'category' %}
+        {% for result in results %}
+        <li><a href="{% url 'threads' category_slug=result.slug %}">
+        {{ result.name }}</a></li>
+        {% endfor %}
+    {% elif object == 'thread' %}
+        {% for result in results %}
+        <li><a href="{% url 'thread' thread_slug=result.slug %}">
+        {{ result.name }}</a></li>
+        {% endfor %}
+    {% elif object == 'post' %}
+        {% for result in results %}
+        <li><a href="#">{{ result.text }}</li></a>
+        {% endfor %}
+    {% endif %}
+{% else %}
+    <li><p>No results found.</p></li>
+{% endif %}

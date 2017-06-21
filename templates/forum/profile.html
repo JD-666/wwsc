@@ -1,0 +1,29 @@
+{% extends 'forum/base.html' %}
+{% block title %}{{ selecteduser.username }} Profile {% endblock title %}
+{% block content %}
+<h1>{{ selecteduser.username }} Profile</h1>
+<img src="{{ MEDIA_URL }}{{ profile.picture }}"
+         width="300" height="300" alt="{{ selecteduser.username }}"/>
+<br/>
+{% if selecteduser.username == user.username %}
+<div class="row">
+<form method="POST" class="form-horizontal" enctype="multipart/form-data">{% csrf_token %}
+    <div class="form-group">
+        <label class="control-label col-md-2" for="{{ profile_form.picture.auto_id }}">{{ profile_form.picture.label }}:</label>
+        <div class="col-md-10">{{ profile_form.picture }}</div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+        <button type="submit" class="save btn btn-default">Update Profile</button>
+        </div>
+    </div>
+    <div class="form-group alert alert-warning">
+        {{ profile_form.picture.errors }}
+    </div>
+</form>
+</div>
+{% else %}
+<p>You're not this user! No form for you.</p>
+{% endif %}
+{% endblock content %}

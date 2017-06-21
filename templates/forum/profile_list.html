@@ -1,0 +1,34 @@
+{% extends 'forum/base.html' %}
+{% block title %}Profiles{% endblock title %}
+{% block content %}
+<h1>Users</h1>
+<div class="panel">
+    {% if profile_list %}
+    <div class="panel-heading">
+        <!-- Display search results in an ordered list -->
+        <div class="panel-body">
+            <div class="list-group">
+            {% for profile in profile_list %}
+                <div class="list-group-item">
+                    {% if profile.picture %}
+                    <img width="64" height="64" src="{{ MEDIA_URL }}{{ profile.picture }}"
+                         alt="picture failed" />
+                    {% else %}
+                    <img width="64" height="64" src="http://lorempixel.com/64/64/people"
+                         alt="no picture found" />
+                    {% endif %}
+                    <h4 class="list-group-item-heading">
+                    <a href="{% url 'profile' profile.user.username %}">
+                        {{ profile.user.username }}
+                    </a>
+                    </h4>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <p>There are no users for this site.</p>
+    {% endif %}
+</div>
+{% endblock content %}
