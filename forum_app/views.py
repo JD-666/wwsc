@@ -88,23 +88,28 @@ def category_edit(request, category_slug):
 @login_required
 def category_add(request):
     """ Verify on submission that category doesn't already exist. - does django
-    do this for us already?
-    "ENFORCE that NO Category can be named "add-category"...
+    do this for us already? - Yes. But we must handle the errors appropriately.
     """
+    banned_cat_names = ['add-category', 'add category']
     if request.method == 'POST':
         form = CategoryForm(request.POST, request.FILES)
         if form.is_valid():
             category = form.save(commit=False)
-            category.save()
-            return redirect('categories')
+            print("category.name = {}".format(category.name))
+            if category.name.lower() not in banned_cat_names:
+                category.save()
+                return redirect('categories')
+            else:
+                print("this is a banned category name. not saving...")
+                context = {'form':form}
+                # also display some kind of feedback to the user
         else:
-            #TODO render template again, but pass errors to be displayed
-            # I think this will tell us if the object already exits :)
             print(form.errors)
+            context = {'form':form}
     else:
         form = CategoryForm()
         context = {'form':form}
-        return render(request, 'forum/category_add.html', context)
+    return render(request, 'forum/category_add.html', context)
 
 
 
@@ -153,22 +158,28 @@ def thread_add(request, category_slug):
     except Thread.DoesNotExist: 
         #TODO raise some kind of error that says thread doesnt exist
         raise Http404
+    banned_thread_names = ['add-thread', 'add thread']
     if request.method == 'POST':
         form = ThreadForm(request.POST, request.FILES)
         if form.is_valid():
             thread = form.save(commit=False)
-            thread.category = category
-            thread.author = request.user
-            thread.save()
-            return redirect('threads', category_slug)
+            if thread.name.lower() not in banned_thread_names:
+                thread.category = category
+                thread.author = request.user
+                thread.save()
+                return redirect('threads', category_slug)
+            else:
+                print("this is a banned thread name. not saving...")
+                context = {'form':form, 'category_slug':category_slug}
         else:
             #TODO render template again, but pass errors to be displayed
             # I think this will tell us if the object already exits :)
             print(form.errors)
+            context = {'form':form, 'category_slug':category_slug}
     else:
         form = ThreadForm()
         context = {'form':form, 'category_slug':category_slug}
-        return render(request, 'forum/thread_add.html', context)
+    return render(request, 'forum/thread_add.html', context)
 
 def search_bar(request):
     """ View to handle Ajax POST requests. A JS function is connected to the
@@ -183,19 +194,24 @@ def search_bar(request):
     """
     if request.method == 'POST':
         # The JS Ajax func gets the search_object from a hidden input element
-        search_object = request.POST['search_object']
+        search_type = request.POST['search_type']
         search_text = request.POST['search_text']
-        if search_object == 'category':
+        if search_type == 'category':
             results = Category.objects.filter(name__contains=search_text)
-        elif search_object == 'thread':
+            context = {'results':results, 'object':search_type}
+        elif search_type == 'thread':
             results = Thread.objects.filter(name__contains=search_text)
-        elif search_object == 'post':
+            cat_slug = request.POST['search_category']
+            #thread_cat = get_object_or_404(Category, slug=cat_slug)
+            context = {'results':results, 'object':search_type,
+                       'category_slug':cat_slug}
+        elif search_type == 'post':
             results = Post.objects.filter(text__contains=search_text)
+            context = {'results':results, 'object':search_type}
         else:
             results = ''
     else:
         raise Http404
-    context = {'results':results, 'object':search_object}
     return render(request, 'forum/ajax_search.html', context)
 
 

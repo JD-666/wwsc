@@ -1,7 +1,8 @@
 {% extends 'forum/base.html' %}
 {% block title %} threads{% endblock title %}
 <!-- block to update value property of element -->
-{% block value %}value="thread"{% endblock value %}
+    {% block SearchType %}value="thread"{% endblock SearchType %}
+    {% block SearchCategory %}value="{{ category.slug }}"{% endblock SearchCategory %}
 {% block content %}
 {% if threads %}
 <ul id="search-results">

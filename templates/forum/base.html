@@ -34,7 +34,8 @@
                      <li><input type="text" id="search" name="search" placeholder="filter"/></li>
                      <!-- special field to identify the type of search (based on current page) -->
                      <!-- utilizes the value block to add attribute to element -->
-                     <input type="hidden" id="hiddenSearch" name="hiddenSearch" {% block value %}{% endblock value %}/>
+                     <input type="hidden" id="SearchType" name="SearchType" {% block SearchType %}{% endblock SearchType %}/>
+                     <input type="hidden" id="SearchCategory" name="SearchCategory" {% block SearchCategory %}{% endblock SearchCategory %}/>
                  </ul>
                  <ul class="nav navbar-nav navbar-right">
                      <!-- special options if user is authenticated -->

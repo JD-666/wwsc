@@ -1,12 +1,12 @@
 {% if results.count > 0%}
     {% if object == 'category' %}
         {% for result in results %}
-        <li><a href="{% url 'threads' category_slug=result.slug %}">
+        <li><a href="{% url 'threads' result.slug %}">
         {{ result.name }}</a></li>
         {% endfor %}
     {% elif object == 'thread' %}
         {% for result in results %}
-        <li><a href="{% url 'thread' thread_slug=result.slug %}">
+        <li><a href="{% url 'thread' category_slug result.slug %}">
         {{ result.name }}</a></li>
         {% endfor %}
     {% elif object == 'post' %}
