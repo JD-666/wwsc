@@ -40,11 +40,12 @@ def thread_list(request, category_slug):
     context = {'threads':threads, 'category':category}
     return render(request, 'forum/thread_list.html', context)
 
-def thread(request, thread_slug):
+def thread(request, category_slug, thread_slug):
     """ View to get all the Post objects that belong to a specific Thread.
     ARGs:
         request object
-        thread_slug - unique identifier for a Thread instance
+        thread_slug - thread we want to show
+        category_slug - parent category for this thread
     RET:
         posts - a list of Post objects
         thread - a Thread object
@@ -65,13 +66,13 @@ def category_edit(request, category_slug):
     or
         HttpRedirect to a URL
     """
-    #TODO currently a jibberish slug just makes this page create a new category
-    #Perhaps use this view only for editing and throw a 404 if no matching slug.
-    #Then create a new view for NEW CATEGORY.
-    #or keep this for both... think about it.
     # Is the user trying to edit an existing category?
     try: # YES category exists
         category = Category.objects.get(slug=category_slug)
+    except Category.DoesNotExist:  # NO category doesn't exist
+        #TODO raise some kind of error that says cat doesnt exist
+        raise Http404
+    else:
         # if POST, then commit changes to existing category
         if request.method == 'POST':
             form = CategoryForm(request.POST, request.FILES, instance=category)
@@ -83,40 +84,50 @@ def category_edit(request, category_slug):
             form = CategoryForm(instance=category)
             context = {'form':form, 'category_slug':category_slug}
             return render(request, 'forum/category_edit.html', context)
-    except Category.DoesNotExist:  # NO category doesn't exist
-        if request.method == 'POST': # must be a new category submission
-            form = CategoryForm(request.POST, request.FILES)
-            if form.is_valid():
-                category = form.save(commit=False)
-                category.save()
-                return redirect('categories')
-            else:
-                #TODO render template again, but pass errors to be displayed
-                print(form.errors)
-        else: # show blank form for new category
-            form = CategoryForm()
-            context = {'form':form, 'category_slug':category_slug, 'new':True}
-            return render(request, 'forum/category_edit.html', context)
 
 @login_required
-def thread_edit(request, thread_slug):
+def category_add(request):
+    """ Verify on submission that category doesn't already exist. - does django
+    do this for us already?
+    "ENFORCE that NO Category can be named "add-category"...
+    """
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.save()
+            return redirect('categories')
+        else:
+            #TODO render template again, but pass errors to be displayed
+            # I think this will tell us if the object already exits :)
+            print(form.errors)
+    else:
+        form = CategoryForm()
+        context = {'form':form}
+        return render(request, 'forum/category_add.html', context)
+
+
+
+
+@login_required
+def thread_edit(request, category_slug, thread_slug):
     """ View to display and handle ThreadForm. This will allow the user to
     create a new Thread or edit and existing Thread.
     ARGs:
-        thread_slug - unique identifier for a Thread instance
+        thread_slug - thread we want to edit
+        category_slug - parent category of specified thread
     RET:
         form - blank or filled out ThreadForm object
     or
         HttpRedirect to a URL
     """
-    #TODO currently a jibberish slug just makes this page create a new Thread
-    #Perhaps use this view only for editing and throw a 404 if no matching slug.
-    #Then create a new view for NEW THREAD.
-    #or keep this for both... think about it.
-
-    # Is the user trying to edit an existing thread?
-    try: # YES thread exists
+    # Is the user trying to edit an existing Thread?
+    try: # YES Thread exists
         thread = Thread.objects.get(slug=thread_slug)
+    except Thread.DoesNotExist:  # NO thread doesn't exist
+        #TODO raise some kind of error that says thread doesnt exist
+        raise Http404
+    else:
         # if POST, then commit changes to existing Thread
         if request.method == 'POST':
             form = ThreadForm(request.POST, request.FILES, instance=thread)
@@ -126,22 +137,38 @@ def thread_edit(request, thread_slug):
                 return redirect('threads')
         else: # Allow user to see form so they can edit thread
             form = ThreadForm(instance=thread)
-            context = {'form':form, 'thread_slug':thread_slug}
+            context = {'form':form, 'thread_slug':thread_slug,
+                       'category_slug':category_slug}
             return render(request, 'forum/thread_edit.html', context)
-    except Thread.DoesNotExist:  # NO thread doesn't exist
-        if request.method == 'POST': # must be a new thread submission
-            form = ThreadForm(request.POST, request.FILES)
-            if form.is_valid():
-                thread = form.save(commit=False)
-                thread.save()
-                return redirect('threads')
-            else:
-                #TODO render template again, but pass errors to be displayed
-                print(form.errors)
-        else: # show blank form for new thread
-            form = ThreadForm()
-            context = {'form':form, 'thread_slug':thread_slug, 'new':True}
-            return render(request, 'forum/thread_edit.html', context)
+
+@login_required
+def thread_add(request, category_slug):
+    """ Verify on submission that thread doesn't already exist. - does django
+    do this for us already?
+    Also add a TextArea / PostForm to capture initial post as well.
+    ENFORCE that NO thread can be named "add-thread".
+    """
+    try: 
+        category = Category.objects.get(slug=category_slug)
+    except Thread.DoesNotExist: 
+        #TODO raise some kind of error that says thread doesnt exist
+        raise Http404
+    if request.method == 'POST':
+        form = ThreadForm(request.POST, request.FILES)
+        if form.is_valid():
+            thread = form.save(commit=False)
+            thread.category = category
+            thread.author = request.user
+            thread.save()
+            return redirect('threads', category_slug)
+        else:
+            #TODO render template again, but pass errors to be displayed
+            # I think this will tell us if the object already exits :)
+            print(form.errors)
+    else:
+        form = ThreadForm()
+        context = {'form':form, 'category_slug':category_slug}
+        return render(request, 'forum/thread_add.html', context)
 
 def search_bar(request):
     """ View to handle Ajax POST requests. A JS function is connected to the

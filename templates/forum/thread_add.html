@@ -1,10 +1,9 @@
+
 {% extends 'forum/base.html' %}
 {% block content %}
-{% if new %}
 <h4>New Thread</h4>
-{% endif %}
 <form method="POST" class="post-form" action=
-      "{% url 'thread_edit' category_slug thread_slug %}" enctype="multipart/form-data">
+      "{% url 'thread_add' category_slug %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="save btn btn-default">Submit</button>

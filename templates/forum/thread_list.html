@@ -6,12 +6,12 @@
 {% if threads %}
 <ul id="search-results">
     {% for thread in threads %}
-    <li><a href="{% url 'thread' thread.slug %}">
+    <li><a href="{% url 'thread' category.slug thread.slug %}">
                 {{ thread.name }}</a></li>
     {% endfor %}
 </ul>
 {% endif %}
 <div>
-    <a href="{% url 'thread_edit' 'new-thread' %}">Create new Thread</a>
+    <a href="{% url 'thread_add' category.slug %}">Create new Thread</a>
 </div>
 {% endblock content %}
