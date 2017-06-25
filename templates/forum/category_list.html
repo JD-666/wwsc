@@ -13,4 +13,7 @@
         <li><p>There are no categories to display.</p></li>
     {% endif %}
 </ul>
+<div>
+    <a href="{% url 'category_edit' 'new-category' %}">Create new Category</a>
+</div>
 {% endblock content %}

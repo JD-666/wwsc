@@ -1,0 +1,13 @@
+{% extends 'forum/base.html' %}
+{% block content %}
+{% if new %}
+<h4>New Thread</h4>
+{% endif %}
+<form method="POST" class="post-form" action=
+      "{% url 'thread_edit' thread_slug %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="save btn btn-default">Submit</button>
+</form>
+<!-- if form errors exist, then display them per rango -->
+{% endblock content %}
