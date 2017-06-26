@@ -34,25 +34,49 @@ def thread_list(request, category_slug):
         threads - a list of Thread objects
         category - a Category object
     """
+    context = {}
     category = get_object_or_404(Category, slug=category_slug)
     threads = category.thread_set.all().order_by('most_recent_post',
               'created_date')
-    context = {'threads':threads, 'category':category}
+    context['threads'] = threads
+    context['category'] = category
     return render(request, 'forum/thread_list.html', context)
 
 def thread(request, category_slug, thread_slug):
     """ View to get all the Post objects that belong to a specific Thread.
+    This View will also handle the PostForm to create a new post in the Thread.
     ARGs:
-        request object
         thread_slug - thread we want to show
         category_slug - parent category for this thread
     RET:
-        posts - a list of Post objects
-        thread - a Thread object
+        posts - a list of Post objects we want to render
+        thread - The parent Thread that the Posts belong to.
+        form - the PostForm object to be rendered
     """
+    context = {}
     thread = get_object_or_404(Thread, slug=thread_slug)
     posts = thread.post_set.all().order_by('created_date')
-    context = {'posts':posts, 'thread':thread}
+    context['posts'] = posts
+    context['thread'] = thread
+    context['category_slug'] = category_slug
+
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.thread = thread
+            post.author = request.user
+            post.save()
+            return redirect('thread', category_slug, thread_slug)
+        else:
+            #TODO render template again, but pass errors to be displayed
+            # I think this will tell us if the object already exits :)
+            print(form.errors)
+            context['form'] = form
+    else:
+        form = PostForm()
+        context['form'] = form
+
     return render(request, 'forum/thread.html', context)
 
 @login_required
@@ -67,23 +91,18 @@ def category_edit(request, category_slug):
         HttpRedirect to a URL
     """
     # Is the user trying to edit an existing category?
-    try: # YES category exists
-        category = Category.objects.get(slug=category_slug)
-    except Category.DoesNotExist:  # NO category doesn't exist
-        #TODO raise some kind of error that says cat doesnt exist
-        raise Http404
-    else:
-        # if POST, then commit changes to existing category
-        if request.method == 'POST':
-            form = CategoryForm(request.POST, request.FILES, instance=category)
-            if form.is_valid():
-                category = form.save(commit=False)
-                category.save()
-                return redirect('categories')
-        else: # Allow user to see form so they can edit category
-            form = CategoryForm(instance=category)
-            context = {'form':form, 'category_slug':category_slug}
-            return render(request, 'forum/category_edit.html', context)
+    category = get_object_or_404(Category, slug=category_slug)
+    # if POST, then commit changes to existing category
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.save()
+            return redirect('categories')
+    else: # Allow user to see form so they can edit category
+        form = CategoryForm(instance=category)
+        context = {'form':form, 'category_slug':category_slug}
+        return render(request, 'forum/category_edit.html', context)
 
 @login_required
 def category_add(request):
@@ -112,8 +131,6 @@ def category_add(request):
     return render(request, 'forum/category_add.html', context)
 
 
-
-
 @login_required
 def thread_edit(request, category_slug, thread_slug):
     """ View to display and handle ThreadForm. This will allow the user to
@@ -127,24 +144,24 @@ def thread_edit(request, category_slug, thread_slug):
         HttpRedirect to a URL
     """
     # Is the user trying to edit an existing Thread?
-    try: # YES Thread exists
-        thread = Thread.objects.get(slug=thread_slug)
-    except Thread.DoesNotExist:  # NO thread doesn't exist
-        #TODO raise some kind of error that says thread doesnt exist
-        raise Http404
-    else:
-        # if POST, then commit changes to existing Thread
-        if request.method == 'POST':
-            form = ThreadForm(request.POST, request.FILES, instance=thread)
-            if form.is_valid():
-                thread = form.save(commit=False)
-                thread.save()
-                return redirect('threads')
-        else: # Allow user to see form so they can edit thread
-            form = ThreadForm(instance=thread)
-            context = {'form':form, 'thread_slug':thread_slug,
-                       'category_slug':category_slug}
-            return render(request, 'forum/thread_edit.html', context)
+    thread = get_object_or_404(Thread, slug=thread_slug)
+    print("Thread object exits... GOOD")
+    # if POST, then commit changes to existing Thread
+    if request.method == 'POST':
+        print("Method == POST... GOOD")
+        form = ThreadForm(request.POST, request.FILES, instance=thread)
+        if form.is_valid():
+            print("form.is_valid()... GOOD")
+            thread = form.save(commit=False)
+            thread.save()
+            return redirect('threads', category_slug)
+        else:
+            print(form.errors)
+    print("Method != POST... ")
+    form = ThreadForm(instance=thread)
+    context = {'form':form, 'thread_slug':thread_slug,
+               'category_slug':category_slug}
+    return render(request, 'forum/thread_edit.html', context)
 
 @login_required
 def thread_add(request, category_slug):
@@ -153,32 +170,46 @@ def thread_add(request, category_slug):
     Also add a TextArea / PostForm to capture initial post as well.
     ENFORCE that NO thread can be named "add-thread".
     """
-    try: 
-        category = Category.objects.get(slug=category_slug)
-    except Thread.DoesNotExist: 
-        #TODO raise some kind of error that says thread doesnt exist
-        raise Http404
+    context = {}
+    context['category_slug'] = category_slug
+    category = get_object_or_404(Category, slug=category_slug)
     banned_thread_names = ['add-thread', 'add thread']
     if request.method == 'POST':
-        form = ThreadForm(request.POST, request.FILES)
-        if form.is_valid():
-            thread = form.save(commit=False)
-            if thread.name.lower() not in banned_thread_names:
-                thread.category = category
-                thread.author = request.user
+        thread_form = ThreadForm(request.POST, request.FILES)
+        post_form = PostForm(request.POST, request.FILES)
+        if thread_form.is_valid():
+            thread = thread_form.save(commit=False)
+            thread.category = category
+            thread.author = request.user
+            if thread.name.lower() in banned_thread_names:
+                print("this is a banned thread name. not saving...")
+                context['thread_form'] = thread_form
+                context['post_form'] = post_form
+                return render(request, 'forum/thread_add.html', context)
+            if post_form.is_valid():
                 thread.save()
+                post = post_form.save(commit=False)
+                post.thread = thread
+                post.author = request.user
+                post.save()
                 return redirect('threads', category_slug)
             else:
-                print("this is a banned thread name. not saving...")
-                context = {'form':form, 'category_slug':category_slug}
+                #TODO render template again, but pass errors to be displayed
+                # I think this will tell us if the object already exits :)
+                print(post_form.errors)
+                context['thread_form'] = thread_form
+                context['post_form'] = post_form
         else:
             #TODO render template again, but pass errors to be displayed
             # I think this will tell us if the object already exits :)
-            print(form.errors)
-            context = {'form':form, 'category_slug':category_slug}
+            print(thread_form.errors)
+            context['thread_form'] = thread_form
+            context['post_form'] = post_form
     else:
-        form = ThreadForm()
-        context = {'form':form, 'category_slug':category_slug}
+        thread_form = ThreadForm()
+        post_form = PostForm()
+        context['thread_form'] = thread_form
+        context['post_form'] = post_form
     return render(request, 'forum/thread_add.html', context)
 
 def search_bar(request):

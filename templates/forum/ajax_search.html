@@ -1,9 +1,22 @@
 {% if results.count > 0%}
     {% if object == 'category' %}
+        <!-- Projects Row -->
+        <div class="row">
         {% for result in results %}
-        <li><a href="{% url 'threads' result.slug %}">
-        {{ result.name }}</a></li>
+            <div class="col-md-4 portfolio-item">
+                <a href="{% url 'threads' result.slug %}">
+                    <img class="img-responsive" src="http://placehold.it/700x400" 
+                         alt="{{ result.name }}">
+                </a>
+                <h3>
+                    <a href="{% url 'threads' result.slug %}">
+                    {{ result.name }}</a>
+                </h3>
+                <p>Most recent post. Number of new posts sice last visit.</p>
+            </div>
         {% endfor %}
+        </div>
+        <!-- /.row -->
     {% elif object == 'thread' %}
         {% for result in results %}
         <li><a href="{% url 'thread' category_slug result.slug %}">
