@@ -1,0 +1,12 @@
+
+{% extends 'forum/base.html' %}
+{% block content %}
+<h4>This is a new category</h4>
+<form method="POST" class="post-form" action=
+      "{% url 'category_add' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="save btn btn-default">Submit</button>
+</form>
+<!-- if form errors exist, then display them per rango -->
+{% endblock content %}

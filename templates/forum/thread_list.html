@@ -1,14 +1,18 @@
 {% extends 'forum/base.html' %}
 {% block title %} threads{% endblock title %}
 <!-- block to update value property of element -->
-{% block value %}value="thread"{% endblock value %}
+    {% block SearchType %}value="thread"{% endblock SearchType %}
+    {% block SearchCategory %}value="{{ category.slug }}"{% endblock SearchCategory %}
 {% block content %}
 {% if threads %}
 <ul id="search-results">
     {% for thread in threads %}
-    <li><a href="{% url 'thread' thread.slug %}">
+    <li><a href="{% url 'thread' category.slug thread.slug %}">
                 {{ thread.name }}</a></li>
     {% endfor %}
 </ul>
 {% endif %}
+<div>
+    <a href="{% url 'thread_add' category.slug %}">Create new Thread</a>
+</div>
 {% endblock content %}

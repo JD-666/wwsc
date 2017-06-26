@@ -9,7 +9,8 @@ $(function() {
             data: {
                 'search_text' : $('#search').val(),
                 'csrfmiddlewaretoken' : $("input[name=csrfmiddlewaretoken]").val(),
-                'search_object' : $("input[name=hiddenSearch]").val()
+                'search_type' : $("input[name=SearchType]").val(),
+                'search_category' : $("input[name=SearchCategory]").val()
             },
             success: searchSuccess,
             dataType: 'html'
