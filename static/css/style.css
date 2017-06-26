@@ -8,6 +8,7 @@ body {
 }
 
 #wrapper {
+    padding-top:50px;
     padding-bottom:150px;
 }
 
@@ -20,3 +21,6 @@ body {
     text-align:center;
 }
 
+#search {
+    margin-top:8px;
+}
