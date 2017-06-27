@@ -138,5 +138,5 @@ STATICFILES_DIRS = [STATIC_DIR]
 #ACCOUNT_ACTIVATION_DAYS = 7 # one-week activation window
 #REGISTRATION_AUTO_LOGIN = True #If True, user auto logs in on signup
 #LOGIN_REDIRECT_URL = '/rango/'
-#LOGIN_URL = '/accounts/login'
+LOGIN_URL = '/forum/'
 

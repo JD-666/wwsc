@@ -12,7 +12,9 @@
     {% endfor %}
 </ul>
 {% endif %}
+{% if user.is_authenticated %}
 <div>
     <a href="{% url 'thread_add' category.slug %}">Create new Thread</a>
 </div>
+{% endif %}
 {% endblock content %}
