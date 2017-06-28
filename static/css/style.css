@@ -29,3 +29,11 @@ body {
     background-color:#263238;
     border-bottom:0px;
 }
+
+#left-nav {
+    padding-left:10px;
+}
+
+#right-nav {
+    padding-right:10px;
+}

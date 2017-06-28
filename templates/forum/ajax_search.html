@@ -5,13 +5,13 @@
         {% for result in results %}
             <div class="col-md-4 portfolio-item">
                 <a href="{% url 'threads' result.slug %}">
-                    <img class="img-responsive" src="http://placehold.it/700x400" 
+                    <img class="img-responsive img-rounded" src="http://placehold.it/700x400" 
                          alt="{{ result.name }}">
                 </a>
-                <h3>
+                <h4>
                     <a href="{% url 'threads' result.slug %}">
                     {{ result.name }}</a>
-                </h3>
+                </h4>
                 <p>Most recent post. Number of new posts sice last visit.</p>
             </div>
         {% endfor %}
