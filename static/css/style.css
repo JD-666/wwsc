@@ -37,3 +37,7 @@ body {
 #right-nav {
     padding-right:10px;
 }
+
+.modal-footer {
+    margin-top:0px;
+}

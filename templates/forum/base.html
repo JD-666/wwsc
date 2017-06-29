@@ -106,8 +106,8 @@
                     <input type="password" class="form-control" id="pwd" placeholder="Enter password">
                 </div>
                 <div><br/></div>
-                <div id="login-result">
-                    <br/>
+                <div id="login-result-div">
+                    <div class="text-info invisible"><p>Placeholder</p></div>
                 </div>
             </div>
             <div class="modal-footer checkbox">
@@ -123,14 +123,14 @@
 <!-- JS section -->
 <script> 
 $(function() {
-    $('#login-result').bind('DOMNodeInserted', function() {
-        var text = $('#login-result').html();
-        if (text == '<div class="alert alert-success"><p>Success!</p></div>') {
+    $('#login-result-div').bind('DOMNodeInserted', function() {
+        if ($('#login-result').hasClass('success')) {
             $(location).attr('href', {% url 'categories' %});
-        } else {
+        } else if ($('#login-result').hasClass('fail')) {
             // Don't clear #username, like 'sticky form'
             //$('#username').val("");
             $('#pwd').val("");
+       // } else {
         }
     });
 });
