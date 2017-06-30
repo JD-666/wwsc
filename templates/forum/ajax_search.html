@@ -1,3 +1,4 @@
+{% load staticfiles %}
 {% if results.count > 0%}
     {% if object == 'category' %}
         <!-- Projects Row -->
@@ -5,8 +6,7 @@
         {% for result in results %}
             <div class="col-md-4 portfolio-item">
                 <a href="{% url 'threads' result.slug %}">
-                    <img class="img-responsive img-rounded" src="http://placehold.it/700x400" 
-                         alt="{{ result.name }}">
+                    <div class="img" style="background-image:url('{{ MEDIA_URL }}{{ result.image }}');"></div>
                 </a>
                 <h4>
                     <a href="{% url 'threads' result.slug %}">

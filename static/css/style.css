@@ -41,3 +41,15 @@ body {
 .modal-footer {
     margin-top:0px;
 }
+
+.img {
+    position:relative;
+    width:21vw;
+    height:24vh;
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:cover;
+    border-radius:10px;
+    border:1px solid #263238;
+
+}

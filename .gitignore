@@ -1,6 +1,7 @@
 db.*
 *.pyc
 .vscode
+*/media/
 # Default github python ignores...
 # Byte-compiled / optimized / DLL files
 *__pycache__/
