@@ -1,5 +1,6 @@
 {% extends 'forum/base.html' %}
 {% load staticfiles %}
+{% load tag_filter_extra %}
 {% block title %}categories{% endblock title %}
 <!-- block to update value property of element -->
 {% block SearchType %}value="category"{% endblock SearchType %}
@@ -22,7 +23,7 @@
 </div>
 <div id="search-results">
     {% if categories %}
-        <!-- Projects Row -->
+        <!-- Tiled Row -->
         <div class="row">
         {% for category in categories %}
             <div class="col-md-4 portfolio-item">
@@ -30,10 +31,13 @@
                     <div class="img" style="background-image:url('{{ MEDIA_URL }}{{ category.image }}');"></div>
                 </a>
                 <h4>
-                    <a href="{% url 'threads' category.slug %}">
+                    <a style="font-family:deja vu sans;" href="{% url 'threads' category.slug %}">
                     {{ category.name }}</a>
                 </h4>
-                <p>Most recent post. Number of new posts sice last visit.</p>
+                   <p>{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
+                   <span class="glyphicon glyphicon-time"></span> {{ category.most_recent_post|time_since }}
+                   </p>
+               <!-- <p>One line description.</p> i-->
             </div>
         {% endfor %}
         </div>
@@ -44,36 +48,5 @@
 </div>
 <br/>
 <br/>
-<!-- Projects Row Example. remove when rest is working well 
-        <div class="row">
-            <div class="col-md-4 portfolio-item">
-                <a href="#">
-                    <img class="img-responsive" src="http://placehold.it/700x400" alt="">
-                </a>
-                <h3>
-                    <a href="#">Category Name</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-            <div class="col-md-4 portfolio-item">
-                <a href="#">
-                    <img class="img-responsive" src="http://placehold.it/700x400" alt="">
-                </a>
-                <h3>
-                    <a href="#">Category Name</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-            <div class="col-md-4 portfolio-item">
-                <a href="#">
-                    <img class="img-responsive" src="http://placehold.it/700x400" alt="">
-                </a>
-                <h3>
-                    <a href="#">Category Name</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-        </div>
- End Example -->
 
 {% endblock content %}

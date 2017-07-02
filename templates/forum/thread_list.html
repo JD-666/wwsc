@@ -1,16 +1,51 @@
 {% extends 'forum/base.html' %}
+{% load tag_filter_extra %}
 {% block title %} threads{% endblock title %}
 <!-- block to update value property of element -->
     {% block SearchType %}value="thread"{% endblock SearchType %}
     {% block SearchCategory %}value="{{ category.slug }}"{% endblock SearchCategory %}
 {% block content %}
+<div class="row">
+    <div class="row">
+        <div class="col-md-10">
+            <h2 style="padding-left:12px;"><a href="{% url 'categories' %}">{{ category.name }}</a> Threads</h2>
+        </div>
+        <div class="col-md-2">
+            {% if user.is_authenticated %}
+            <h2><small>
+            <a href="{% url 'thread_add' category.slug %}">
+            <span class="glyphicon glyphicon-plus pull-right" style="padding-right:12px; padding-top:10px;"></span>
+            </a></small></h2>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row"><div class="col-md-12"><hr style="margin-top:0px; margin-left:12px; margin-right:12px;"></div></div>
+</div>
 {% if threads %}
-<ul id="search-results">
-    {% for thread in threads %}
-    <li><a href="{% url 'thread' category.slug thread.slug %}">
-                {{ thread.name }}</a></li>
-    {% endfor %}
-</ul>
+<table class="table table-hover table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Posts</th>
+        <th>Originator</th>
+        <th>Activity</th>
+      </tr>
+    </thead>
+    <tbody id="search-results">
+      {% for thread in threads %}
+      <tr>
+        <td>
+          <a href="{% url 'thread' category.slug thread.slug %}">
+             {{ thread.name }}
+          </a>
+        </td>
+        <td>{{ thread.num_posts }}</td>
+        <td>{{ thread.author }}</td>
+        <td>{{ thread.most_recent_post|time_since }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
 {% endif %}
 {% if user.is_authenticated %}
 <div>

@@ -21,14 +21,13 @@ def category_list(request):
     RET rendered HTML page with context:
         categories - a list of Categories objects.
     """
-    categories = Category.objects.all()
+    categories = Category.objects.all().order_by('-most_recent_post')
     context = {'categories':categories}
     return render(request, 'forum/category_list.html', context)
 
 def thread_list(request, category_slug):
     """ View to get all the Thread objects that belong to a specific Category.
     ARGs:
-        request object
         category_slug - unique identifier for category
     RET:
         threads - a list of Thread objects
@@ -36,7 +35,7 @@ def thread_list(request, category_slug):
     """
     context = {}
     category = get_object_or_404(Category, slug=category_slug)
-    threads = category.thread_set.all().order_by('most_recent_post',
+    threads = category.thread_set.all().order_by('-most_recent_post',
               'created_date')
     context['threads'] = threads
     context['category'] = category
@@ -66,7 +65,7 @@ def thread(request, category_slug, thread_slug):
             post = form.save(commit=False)
             post.thread = thread
             post.author = request.user
-            post.save()
+            post.new()
             return redirect('thread', category_slug, thread_slug)
         else:
             #TODO render template again, but pass errors to be displayed
@@ -116,7 +115,7 @@ def category_add(request):
             category = form.save(commit=False)
             print("category.name = {}".format(category.name))
             if category.name.lower() not in banned_cat_names:
-                category.save()
+                category.new()
                 return redirect('categories')
             else:
                 print("this is a banned category name. not saving...")
@@ -187,11 +186,11 @@ def thread_add(request, category_slug):
                 context['post_form'] = post_form
                 return render(request, 'forum/thread_add.html', context)
             if post_form.is_valid():
-                thread.save()
+                thread.new()
                 post = post_form.save(commit=False)
                 post.thread = thread
                 post.author = request.user
-                post.save()
+                post.new()
                 return redirect('threads', category_slug)
             else:
                 #TODO render template again, but pass errors to be displayed
@@ -229,20 +228,24 @@ def search_bar(request):
         search_type = request.POST['search_type']
         search_text = request.POST['search_text']
         if search_type == 'category':
-            results = Category.objects.filter(name__contains=search_text)
+            results = Category.objects.filter(name__contains=search_text).order_by(
+                               '-most_recent_post')
             context = {'results':results, 'object':search_type}
         elif search_type == 'thread':
             cat_slug = request.POST['search_category']
             cat = get_object_or_404(Category, slug=cat_slug)
-            results = Thread.objects.filter(category=cat,name__contains=search_text)
+            results = Thread.objects.filter(category=cat,name__contains=search_text).order_by(
+                             '-most_recent_post','created_date')
             cat_slug = request.POST['search_category']
             context = {'results':results, 'object':search_type,
                        'category_slug':cat_slug}
         elif search_type == 'post':
-            results = Post.objects.filter(text__contains=search_text)
+            results = Post.objects.filter(text__contains=search_text).order_by(
+                           '-most_recent_post','created_date')
             context = {'results':results, 'object':search_type}
         else:
             results = ''
+            context = {'results':results, 'object':search_type}
     else:
         raise Http404
     return render(request, 'forum/ajax_search.html', context)
