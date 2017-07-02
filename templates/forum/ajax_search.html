@@ -1,48 +1,29 @@
 {% load staticfiles %}
 {% load tag_filter_extra %}
-{% if results.count > 0%}
     {% if object == 'category' %}
-        <!-- Projects Row -->
-        <div class="row">
-        {% for category in results %}
-            <div class="col-md-4 portfolio-item">
-                <a href="{% url 'threads' category.slug %}">
-                    <div class="img" style="background-image:url('{{ MEDIA_URL }}{{ category.image }}');"></div>
-                </a>
-                <h4>
-                    <a href="{% url 'threads' category.slug %}">
-                    {{ category.name }}</a>
-                </h4>
-                   <p>{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
-                   <span class="glyphicon glyphicon-time"></span> {{ category.most_recent_post|time_since }}
-                   </p>
-            </div>
-        {% endfor %}
-        </div>
-        <!-- /.row -->
+        {% if categories %}
+            {% category_tiles %}
+        {% else %}
+            <tr class="alert alert-warning">
+                <td><p>No categories match your filter.</p></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endif %}
     {% elif object == 'thread' %}
-      {% for thread in results %}
-      <tr>
-        <td>
-          <a href="{% url 'thread' category_slug thread.slug %}">
-             {{ thread.name }}
-          </a>
-        </td>
-        <td>{{ thread.num_posts }}</td>
-        <td>{{ thread.author }}</td>
-        <td>{{ thread.most_recent_post|time_since }}</td>
-      </tr>
-      {% endfor %}
+        {% if threads %}
+            {% thread_table_rows %}
+        {% else %}
+            <tr class="alert alert-warning">
+                <td><p>No threads match your filter.</p></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endif %}
     {% elif object == 'post' %}
         {% for result in results %}
         <li><a href="#">{{ result.text }}</li></a>
         {% endfor %}
     {% endif %}
-{% else %}
-    <tr class="alert alert-warning">
-        <td><p>No results match your filter.</p></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-{% endif %}

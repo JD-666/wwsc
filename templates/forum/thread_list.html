@@ -32,24 +32,10 @@
       </tr>
     </thead>
     <tbody id="search-results">
-      {% for thread in threads %}
-      <tr>
-        <td>
-          <a href="{% url 'thread' category.slug thread.slug %}">
-             {{ thread.name }}
-          </a>
-        </td>
-        <td>{{ thread.num_posts }}</td>
-        <td>{{ thread.author }}</td>
-        <td>{{ thread.most_recent_post|time_since }}</td>
-      </tr>
-      {% endfor %}
+        {% thread_table_rows %}
     </tbody>
 </table>
 {% endif %}
-{% if user.is_authenticated %}
-<div>
-    <a href="{% url 'thread_add' category.slug %}">Create new Thread</a>
-</div>
-{% endif %}
+<br/>
+<br/>
 {% endblock content %}

@@ -51,5 +51,20 @@ body {
     background-size:cover;
     border-radius:10px;
     border:1px solid #263238;
+}
 
+.well {
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    margin-bottom:10px;
+}
+
+.post-meta {
+    margin-top:10px;
+    margin-bottom:-8px;
+}
+
+.thread-header {
+    margin-top:0px;
+    color:#263238;
 }

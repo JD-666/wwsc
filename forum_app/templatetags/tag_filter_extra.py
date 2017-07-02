@@ -50,3 +50,12 @@ def time_since(value):
     if dif.microseconds:
         return "1 second ago"
     return "time error" 
+
+
+@register.inclusion_tag('forum/category_tiles.html', takes_context=True)
+def category_tiles(context):
+    return context
+
+@register.inclusion_tag('forum/thread_table_rows.html', takes_context=True)
+def thread_table_rows(context):
+    return context

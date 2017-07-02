@@ -228,17 +228,16 @@ def search_bar(request):
         search_type = request.POST['search_type']
         search_text = request.POST['search_text']
         if search_type == 'category':
-            results = Category.objects.filter(name__contains=search_text).order_by(
+            categories = Category.objects.filter(name__contains=search_text).order_by(
                                '-most_recent_post')
-            context = {'results':results, 'object':search_type}
+            context = {'categories':categories, 'object':search_type}
         elif search_type == 'thread':
             cat_slug = request.POST['search_category']
             cat = get_object_or_404(Category, slug=cat_slug)
-            results = Thread.objects.filter(category=cat,name__contains=search_text).order_by(
+            threads = Thread.objects.filter(category=cat,name__contains=search_text).order_by(
                              '-most_recent_post','created_date')
-            cat_slug = request.POST['search_category']
-            context = {'results':results, 'object':search_type,
-                       'category_slug':cat_slug}
+            context = {'threads':threads, 'object':search_type,
+                       'category':cat}
         elif search_type == 'post':
             results = Post.objects.filter(text__contains=search_text).order_by(
                            '-most_recent_post','created_date')
