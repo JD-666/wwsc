@@ -1,12 +1,19 @@
 {% extends 'forum/base.html' %}
 {% block title %} posts{% endblock title %}
+ {% block breadcrumb %}
+ <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
+    <li class="breadcrumb-item active">{{ thread.name }}</li>
+ </ul>
+ {% endblock breadcrumb %}
 <!-- block to update value property of element -->
 {% block value %}value="post"{% endblock value %}
 {% block content %}
 {% if posts %}
 <div class="row">
-<div class="col-md-1"></div>
-<div class="col-md-10">
+<div class="col-md-1 col-sm-2 col-xs-1"></div>
+<div class="col-md-10 col-sm-8 col-xs-10">
 <div id="search-results">
     {% for post in posts %}
         <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text }}
@@ -16,13 +23,13 @@
 {% endif %}
 {% if user.is_authenticated %}
 <form method="POST" class="post-form" action=
-      "{% url 'thread' category_slug thread.slug %}" enctype="multipart/form-data">
+      "{% url 'thread' category.slug thread.slug %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="save btn btn-default">Submit</button>
 </form>
 </div>
-<div class="col-md-1"></div>
+<div class="col-md-1 col-sm-2 col-xs-1"></div>
 </div>
 {% endif %}
 <br/>

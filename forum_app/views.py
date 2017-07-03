@@ -54,10 +54,11 @@ def thread(request, category_slug, thread_slug):
     """
     context = {}
     thread = get_object_or_404(Thread, slug=thread_slug)
+    category = get_object_or_404(Category, slug=category_slug)
     posts = thread.post_set.all().order_by('created_date')
     context['posts'] = posts
     context['thread'] = thread
-    context['category_slug'] = category_slug
+    context['category'] = category
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
