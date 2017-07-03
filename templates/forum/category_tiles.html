@@ -1,0 +1,20 @@
+{% load tag_filter_extra %}
+<!-- Tiled Row -->
+<div class="row">
+{% for category in categories %}
+    <div class="col-md-4 col-sm-4 col-xs-4 portfolio-item theme2">
+        <a href="{% url 'threads' category.slug %}">
+            <div class="img" style="background-image:url('{{ MEDIA_URL }}{{ category.image }}');"></div>
+        </a>
+        <h4 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            <a href="{% url 'threads' category.slug %}">
+            {{ category.name }}</a>
+        </h4>
+           <p>{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
+           <span class="glyphicon glyphicon-time"></span> {{ category.most_recent_post|time_since }}
+           </p>
+       <!-- <p>One line description.</p> i-->
+    </div>
+{% endfor %}
+</div>
+<!-- /.row -->

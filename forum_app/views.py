@@ -21,14 +21,13 @@ def category_list(request):
     RET rendered HTML page with context:
         categories - a list of Categories objects.
     """
-    categories = Category.objects.all()
+    categories = Category.objects.all().order_by('-most_recent_post')
     context = {'categories':categories}
     return render(request, 'forum/category_list.html', context)
 
 def thread_list(request, category_slug):
     """ View to get all the Thread objects that belong to a specific Category.
     ARGs:
-        request object
         category_slug - unique identifier for category
     RET:
         threads - a list of Thread objects
@@ -36,7 +35,7 @@ def thread_list(request, category_slug):
     """
     context = {}
     category = get_object_or_404(Category, slug=category_slug)
-    threads = category.thread_set.all().order_by('most_recent_post',
+    threads = category.thread_set.all().order_by('-most_recent_post',
               'created_date')
     context['threads'] = threads
     context['category'] = category
@@ -55,10 +54,11 @@ def thread(request, category_slug, thread_slug):
     """
     context = {}
     thread = get_object_or_404(Thread, slug=thread_slug)
+    category = get_object_or_404(Category, slug=category_slug)
     posts = thread.post_set.all().order_by('created_date')
     context['posts'] = posts
     context['thread'] = thread
-    context['category_slug'] = category_slug
+    context['category'] = category
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -66,7 +66,7 @@ def thread(request, category_slug, thread_slug):
             post = form.save(commit=False)
             post.thread = thread
             post.author = request.user
-            post.save()
+            post.new()
             return redirect('thread', category_slug, thread_slug)
         else:
             #TODO render template again, but pass errors to be displayed
@@ -116,7 +116,7 @@ def category_add(request):
             category = form.save(commit=False)
             print("category.name = {}".format(category.name))
             if category.name.lower() not in banned_cat_names:
-                category.save()
+                category.new()
                 return redirect('categories')
             else:
                 print("this is a banned category name. not saving...")
@@ -187,11 +187,11 @@ def thread_add(request, category_slug):
                 context['post_form'] = post_form
                 return render(request, 'forum/thread_add.html', context)
             if post_form.is_valid():
-                thread.save()
+                thread.new()
                 post = post_form.save(commit=False)
                 post.thread = thread
                 post.author = request.user
-                post.save()
+                post.new()
                 return redirect('threads', category_slug)
             else:
                 #TODO render template again, but pass errors to be displayed
@@ -217,30 +217,35 @@ def search_bar(request):
     keyup signal from the search bar. Each keypress triggers the JS function
     to use Ajax to send data to this view and get data back to display in html 
     ARGs:
-        None, or you can argue POST['search_object'] & POST['search_text']
-        search_object is the type of object to return.
+        None, or you can argue POST['search_type'] & POST['search_text']
+        search_type is the type of object to return (category, Thread, Post).
     RET:
         results - A list of objects from the DB that contain 'search_text'
-        search_object - the type of DB object model
+        object - the type of DB object model
+        category_slug* - Category that current Thread set belong to.
     """
     if request.method == 'POST':
         # The JS Ajax func gets the search_object from a hidden input element
         search_type = request.POST['search_type']
         search_text = request.POST['search_text']
         if search_type == 'category':
-            results = Category.objects.filter(name__contains=search_text)
-            context = {'results':results, 'object':search_type}
+            categories = Category.objects.filter(name__contains=search_text).order_by(
+                               '-most_recent_post')
+            context = {'categories':categories, 'object':search_type}
         elif search_type == 'thread':
-            results = Thread.objects.filter(name__contains=search_text)
             cat_slug = request.POST['search_category']
-            #thread_cat = get_object_or_404(Category, slug=cat_slug)
-            context = {'results':results, 'object':search_type,
-                       'category_slug':cat_slug}
+            cat = get_object_or_404(Category, slug=cat_slug)
+            threads = Thread.objects.filter(category=cat,name__contains=search_text).order_by(
+                             '-most_recent_post','created_date')
+            context = {'threads':threads, 'object':search_type,
+                       'category':cat}
         elif search_type == 'post':
-            results = Post.objects.filter(text__contains=search_text)
+            results = Post.objects.filter(text__contains=search_text).order_by(
+                           '-most_recent_post','created_date')
             context = {'results':results, 'object':search_type}
         else:
             results = ''
+            context = {'results':results, 'object':search_type}
     else:
         raise Http404
     return render(request, 'forum/ajax_search.html', context)
@@ -259,19 +264,24 @@ def ajax_login(request):
     username = request.POST.get('username','') # defaults to '' 
     password = request.POST.get('password','')
     remember = request.POST.get('remember','')
-    user = authenticate(username=username, password=password)
     response_data = {}
-    if user is None: # failed authentication
-        fail_str = '<div class="alert alert-warning"><p>Your username and password do not match...</p></div>'
+    if User.objects.filter(username=username).exists():
+        user = authenticate(username=username, password=password)
+        if user is None: # failed authentication
+            fail_str = '<div id="login-result" class="text-danger fail"><p>Invalid password...</p></div>'
+            response_data['result'] = fail_str
+        else: # successfull authentication
+            success_str = '<div id="login-result" class="text-success success"><p>Success!</p></div>'
+            response_data['result'] = success_str
+            login(request, user)
+            if remember == 'false':
+                settings.SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+            elif remember == 'true':
+                settings.SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+    else:
+        print("User does not exist!")
+        fail_str = '<div id="login-result" class="text-danger fail"><p>Username does not exist...</p></div>'
         response_data['result'] = fail_str
-    else: # successfull authentication
-        success_str = '<div class="alert alert-success"><p>Success!</p></div>'
-        response_data['result'] = success_str
-        login(request, user)
-        if remember == 'false':
-            settings.SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-        elif remember == 'true':
-            settings.SESSION_EXPIRE_AT_BROWSER_CLOSE = False
     return HttpResponse(json.dumps(response_data), 
            content_type='application/json')
 

@@ -62,23 +62,17 @@ class Category(models.Model):
     num_posts = models.IntegerField(default=0)
     slug = models.SlugField(unique=True)
 
-    def save(self, *args, **kwargs):
-        """ Overrides the save method to create a slug attribute based on
-        name then continue to call normal save() method again like normal. 
-        Also ensures num_threads and num_posts are valid.
-        """
+    def new(self, *args, **kwargs):
         # validate some attributes
         if self.num_threads < 0:
             self.num_threads = 0
         if self.num_posts < 0:
             self.num_posts = 0
-        # Only new Posts will update this field
-        if self.most_recent_post:
-            self.most_recent_post = None
         # create slug
         self.slug = slugify(self.name)
         # call origional save to commit data to DB
-        super(Category, self).save(*args, **kwargs)
+        self.save(*args, **kwargs)
+        return
 
     def get_upload_name(instance, filename):
         """ NOT CURRENTLY IN USE. WILL HAVE THE VIEW HANDLE THIS
@@ -115,12 +109,11 @@ class Thread(models.Model):
         self.approved = True
         self.save()
 
-    def save(self, *args, **kwargs):
-        """ Overrides the save method to create a slug attribute based on
-        name then continue to call normal save() method again like normal. 
-        """
+    def new(self, *args, **kwargs):
         self.slug = slugify(self.name)
-        super(Thread, self).save(*args, **kwargs)
+        self.category.num_threads += 1
+        self.save(*args, **kwargs)
+        return
 
     def __str__(self):
         return self.name
@@ -134,9 +127,18 @@ class Post(models.Model):
    thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
    created_date = models.DateTimeField(default=timezone.now)
 
+   def new(self, *args, **kwargs):
+       self.thread.most_recent_post = self.created_date
+       self.thread.num_posts += 1
+       self.thread.category.most_recent_post = self.created_date
+       self.thread.category.num_posts += 1
+       self.thread.save()
+       self.thread.category.save()
+       self.save(*args, **kwargs)
+       return
+
+
    def __str__(self):
        return self.text
 
     
-
-        

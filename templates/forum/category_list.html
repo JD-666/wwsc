@@ -1,72 +1,39 @@
 {% extends 'forum/base.html' %}
+{% load staticfiles %}
+{% load tag_filter_extra %}
 {% block title %}categories{% endblock title %}
+     {% block breadcrumb %}
+     <ul class="breadcrumb" style="display:inline-block;">
+            <li class="breadcrumb-item active">Home</li>
+     </ul>
+     {% endblock breadcrumb %}
 <!-- block to update value property of element -->
 {% block SearchType %}value="category"{% endblock SearchType %}
 {% block content %} 
 <div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">WWSC
-            <small><a href="{% url 'category_add' %}">new</a></small>
-        </h1>
+    <div class="row">
+        <div class="col-md-6">
+            <h2 style="padding-left:12px;">Topics</h2>
+        </div>
+        <div class="col-md-6">
+            {% if user.is_authenticated %}
+            <h2><small>
+            <a href="{% url 'category_add' %}">
+            <span class="glyphicon glyphicon-plus pull-right" style="padding-right:12px; padding-top:10px;"></span>
+            </a></small></h2>
+            {% endif %}
+        </div>
     </div>
+    <div class="row"><div class="col-md-12"><hr style="margin-top:0px; margin-left:12px; margin-right:12px;"></div></div>
 </div>
 <div id="search-results">
     {% if categories %}
-        <!-- Projects Row -->
-        <div class="row">
-        {% for category in categories %}
-            <div class="col-md-4 portfolio-item">
-                <a href="{% url 'threads' category.slug %}">
-                    <img class="img-responsive" src="http://placehold.it/700x400"
-                         alt="{{ category.name }}">
-                </a>
-                <h3>
-                    <a href="{% url 'threads' category.slug %}">
-                    {{ category.name }}</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-        {% endfor %}
-        </div>
-        <!-- /.row -->
+        {% category_tiles %}
     {% else %}
-        <li><p>There are no categories to display.</p></li>
+        <p>There are no categories to display.</p>
     {% endif %}
 </div>
-<div>
-    <a href="{% url 'category_add' %}">Create new Category</a>
-</div>
-
-<!-- Projects Row Example. remove when rest is working well -->
-        <div class="row">
-            <div class="col-md-4 portfolio-item">
-                <a href="#">
-                    <img class="img-responsive" src="http://placehold.it/700x400" alt="">
-                </a>
-                <h3>
-                    <a href="#">Category Name</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-            <div class="col-md-4 portfolio-item">
-                <a href="#">
-                    <img class="img-responsive" src="http://placehold.it/700x400" alt="">
-                </a>
-                <h3>
-                    <a href="#">Category Name</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-            <div class="col-md-4 portfolio-item">
-                <a href="#">
-                    <img class="img-responsive" src="http://placehold.it/700x400" alt="">
-                </a>
-                <h3>
-                    <a href="#">Category Name</a>
-                </h3>
-                <p>Most recent post. Number of new posts sice last visit.</p>
-            </div>
-        </div>
-<!-- /.row -->
+<br/>
+<br/>
 
 {% endblock content %}

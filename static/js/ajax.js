@@ -23,8 +23,11 @@ function searchSuccess(data, textStatus, jqXHR) {
     $('#search-results').html(data);
 }
 
-
 function AuthenticateUser() {
+    $('#login-result-div').html('<div class="text-info"><p>Attempting to login...</p></div>');
+    setTimeout(auth_process,800);
+}
+function auth_process() {
     /* Uses Ajax to send POST information to be processed by a view. The view
     sends back a json object with a string in jason.result */
     $.ajax({
@@ -39,8 +42,8 @@ function AuthenticateUser() {
             remember: $('#remember').prop('checked')
         },
         success: function (json) {
-            $('#login-result').html(json.result);
+            $('#login-result-div').html(json.result);
         }
     });
-    $('#login-result').html("<br/><br/><br/>");
+    //$('#login-result-div').html('<div id="login-result" class="alert alert-info"><p>Attempting to login...</p></div>');
 }

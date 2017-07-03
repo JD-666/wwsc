@@ -1,18 +1,47 @@
 {% extends 'forum/base.html' %}
+{% load tag_filter_extra %}
 {% block title %} threads{% endblock title %}
+ {% block breadcrumb %}
+ <ul class="breadcrumb" style="display:inline-block;">
+        <li class="breadcrumb-item"><a href="{% url 'categories' %}">Home</a></li>
+        <li class="breadcrumb-item active">{{ category.name }}</li>
+ </ul>
+ {% endblock breadcrumb %}
 <!-- block to update value property of element -->
     {% block SearchType %}value="thread"{% endblock SearchType %}
     {% block SearchCategory %}value="{{ category.slug }}"{% endblock SearchCategory %}
 {% block content %}
-{% if threads %}
-<ul id="search-results">
-    {% for thread in threads %}
-    <li><a href="{% url 'thread' category.slug thread.slug %}">
-                {{ thread.name }}</a></li>
-    {% endfor %}
-</ul>
-{% endif %}
-<div>
-    <a href="{% url 'thread_add' category.slug %}">Create new Thread</a>
+<div class="row theme2">
+    <div class="row">
+        <div class="col-md-10">
+            <h2 style="padding-left:12px;"><a href="{% url 'categories' %}">{{ category.name }}</a></h2>
+        </div>
+        <div class="col-md-2">
+            {% if user.is_authenticated %}
+            <h2><small>
+            <a href="{% url 'thread_add' category.slug %}">
+            <span class="glyphicon glyphicon-plus pull-right" style="padding-right:12px; padding-top:10px;"></span>
+            </a></small></h2>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row"><div class="col-md-12"><hr style="margin-top:0px; margin-left:12px; margin-right:12px;"></div></div>
 </div>
+{% if threads %}
+<table class="table table-hover table-condensed theme2">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Posts</th>
+        <th>Originator</th>
+        <th>Activity</th>
+      </tr>
+    </thead>
+    <tbody id="search-results">
+        {% thread_table_rows %}
+    </tbody>
+</table>
+{% endif %}
+<br/>
+<br/>
 {% endblock content %}
