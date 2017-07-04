@@ -1,8 +1,9 @@
 {% extends 'forum/base.html' %}
 {% block title %} posts{% endblock title %}
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
  {% block breadcrumb %}
  <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
     <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
     <li class="breadcrumb-item active">{{ thread.name }}</li>
  </ul>
@@ -16,7 +17,7 @@
 <div class="col-md-10 col-sm-8 col-xs-10">
 <div id="search-results">
     {% for post in posts %}
-        <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text }}
+        <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
 <div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }}</div></div>
     {% endfor %}
 </div>
@@ -26,7 +27,7 @@
       "{% url 'thread' category.slug thread.slug %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="save btn btn-default">Submit</button>
+    <button type="submit" id="submit-post" class="save btn btn-default">Submit</button>
 </form>
 </div>
 <div class="col-md-1 col-sm-2 col-xs-1"></div>
@@ -34,4 +35,16 @@
 {% endif %}
 <br/>
 <br/>
+<script>
+    var simplemde = new SimpleMDE({ 
+        element: document.getElementById("id_text"),
+        autosave: {enabled:true, uniqueId:"forum_post", delay:30000,},
+        toolbar:(["bold","italic","quote","|","unordered-list",
+          "ordered-list","|","table","code","|","link","image","|",
+          "preview","side-by-side","fullscreen","|","guide"]),
+        hideicons:["fullscreen",],
+        placeholder:"Message",
+        forceSync:true,
+    });
+</script>
 {% endblock content %}

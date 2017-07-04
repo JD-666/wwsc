@@ -1,4 +1,10 @@
 {% extends 'forum/base.html' %}
+ {% block breadcrumb %}
+ <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
+    <li class="breadcrumb-item active">Register</li>
+ </ul>
+ {% endblock breadcrumb %}
 {% block content %}
 <div class="row">
 <form method="POST" class="form-horizontal" enctype="multipart/form-data">{% csrf_token %}

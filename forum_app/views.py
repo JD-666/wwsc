@@ -7,6 +7,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from datetime import datetime
 import json
+from markdown import markdown
+import bleach
 
 from forum_app.models import Category, Thread, Post, User, Profile
 from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm
@@ -64,6 +66,7 @@ def thread(request, category_slug, thread_slug):
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
+            post.text = markdown(bleach.clean(post.text).replace('&gt;','>'))
             post.thread = thread
             post.author = request.user
             post.new()
@@ -101,7 +104,7 @@ def category_edit(request, category_slug):
             return redirect('categories')
     else: # Allow user to see form so they can edit category
         form = CategoryForm(instance=category)
-        context = {'form':form, 'category_slug':category_slug}
+        context = {'form':form, 'category':category}
         return render(request, 'forum/category_edit.html', context)
 
 @login_required
@@ -145,22 +148,19 @@ def thread_edit(request, category_slug, thread_slug):
     """
     # Is the user trying to edit an existing Thread?
     thread = get_object_or_404(Thread, slug=thread_slug)
-    print("Thread object exits... GOOD")
+    category = get_object_or_404(Category, slug=category_slug)
     # if POST, then commit changes to existing Thread
     if request.method == 'POST':
-        print("Method == POST... GOOD")
         form = ThreadForm(request.POST, request.FILES, instance=thread)
         if form.is_valid():
-            print("form.is_valid()... GOOD")
             thread = form.save(commit=False)
             thread.save()
-            return redirect('threads', category_slug)
+            return redirect('threads', category.slug)
         else:
             print(form.errors)
-    print("Method != POST... ")
     form = ThreadForm(instance=thread)
-    context = {'form':form, 'thread_slug':thread_slug,
-               'category_slug':category_slug}
+    context = {'form':form, 'thread':thread,
+               'category':category}
     return render(request, 'forum/thread_edit.html', context)
 
 @login_required
@@ -171,8 +171,8 @@ def thread_add(request, category_slug):
     ENFORCE that NO thread can be named "add-thread".
     """
     context = {}
-    context['category_slug'] = category_slug
     category = get_object_or_404(Category, slug=category_slug)
+    context['category'] = category
     banned_thread_names = ['add-thread', 'add thread']
     if request.method == 'POST':
         thread_form = ThreadForm(request.POST, request.FILES)
@@ -189,10 +189,11 @@ def thread_add(request, category_slug):
             if post_form.is_valid():
                 thread.new()
                 post = post_form.save(commit=False)
+                post.text = markdown(bleach.clean(post.text))
                 post.thread = thread
                 post.author = request.user
                 post.new()
-                return redirect('threads', category_slug)
+                return redirect('threads', category)
             else:
                 #TODO render template again, but pass errors to be displayed
                 # I think this will tell us if the object already exits :)

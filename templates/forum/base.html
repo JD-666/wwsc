@@ -13,7 +13,9 @@
     <link href="https://fonts.googleapis.com/css?family=Rationale|Roboto" rel="stylesheet"> 
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/simplemde.min.css' %}"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="{% static "js/simplemde.min.js" %}"></script>
 </head>
 <!-- html Body -->
 <body>
@@ -35,7 +37,7 @@
     </div>
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     <!-- Seach bar section -->
-    <ul class="nav navbar-nav">
+    <ul class="nav navbar-nav {% block searchbar-class %}{% endblock %}">
      {% csrf_token %}
      <div id="search-div" class="form-group has-success has-feedback">
          <input type="text" id="search" class="form-control input-sm" name="search" placeholder="Filter"/>

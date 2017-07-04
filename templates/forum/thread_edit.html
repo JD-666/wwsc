@@ -1,10 +1,15 @@
 {% extends 'forum/base.html' %}
+ {% block breadcrumb %}
+ <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'thread' category.slug thread.slug %}">{{ thread.name }}</a></li>
+    <li class="breadcrumb-item active">Edit</li>
+ </ul>
+ {% endblock breadcrumb %}
 {% block content %}
-{% if new %}
-<h4>New Thread</h4>
-{% endif %}
 <form method="POST" class="post-form" action=
-      "{% url 'thread_edit' category_slug thread_slug %}" enctype="multipart/form-data">
+      "{% url 'thread_edit' category.slug thread.slug %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="save btn btn-default">Submit</button>
