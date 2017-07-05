@@ -10,7 +10,7 @@
             <a href="{% url 'threads' category.slug %}">
             {{ category.name }}</a>
         </h4>
-           <p>{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
+           <p class="small">{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
            <span class="glyphicon glyphicon-time"></span> {{ category.most_recent_post|time_since }}
            </p>
        <!-- <p>One line description.</p> i-->
