@@ -38,12 +38,20 @@ button:hover {
 
 #search-div {
     margin-bottom:0px;
+    color:#263238;
 }
 
 #search {
     margin-top:8px;
     width:150px;
     padding-right:22px;
+    border:0px;
+}
+#search:focus {
+    box-shadow:0 0 6px #f1f4f0;
+}
+#searchIcon {
+    color:#263238;
 }
 
 .theme {
@@ -59,6 +67,12 @@ button:hover {
     font-family: 'Rationale', sans-serif;
     padding-left:45px;
     padding-right:25px;
+    transition:all 2s;
+}
+.navbar-brand:hover {
+    transform:rotate(360deg);
+    -webkit-transform:rotate(360deg);
+    -ms-transform:rotate(360deg);
 }
 
 .navbar {
