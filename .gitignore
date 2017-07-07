@@ -3,6 +3,8 @@ db.*
 .vscode
 */media/
 media/
+forum_app/migrations/*
+forum_app/__pycache__/*
 # Default github python ignores...
 # Byte-compiled / optimized / DLL files
 *__pycache__/

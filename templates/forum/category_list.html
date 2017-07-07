@@ -2,14 +2,18 @@
 {% load staticfiles %}
 {% load tag_filter_extra %}
 {% block title %}categories{% endblock title %}
-     {% block breadcrumb %}
-     <ul class="breadcrumb">
-            <li class="breadcrumb-item active">Topics</li>
-     </ul>
-     {% endblock breadcrumb %}
 <!-- block to update value property of element -->
 {% block SearchType %}value="category"{% endblock SearchType %}
 {% block content %} 
+<div class="row">
+    <div class="col-md-12">
+     <ul class="breadcrumb" style="display:inline-block;">
+         <li class="breadcrumb-item">Topics</li>
+         <li class="breadcrumb-item">Library</li>
+         <li class="breadcrumb-item active">Data</li>
+     </ul>
+    </div>
+</div>
 <div class="row">
     <div class="row">
         <div class="col-md-6">

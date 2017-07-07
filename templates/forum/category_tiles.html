@@ -6,11 +6,11 @@
         <a href="{% url 'threads' category.slug %}">
             <div class="img" style="background-image:url('{{ MEDIA_URL }}{{ category.image }}');"></div>
         </a>
-        <h4 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        <h4 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;">
             <a href="{% url 'threads' category.slug %}">
             {{ category.name }}</a>
         </h4>
-           <p class="small">{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
+           <p class="small" style="text-align:center;">{{ category.num_threads }} Threads. {{ category.num_posts }} Posts.
            <span class="glyphicon glyphicon-time"></span> {{ category.most_recent_post|time_since }}
            </p>
        <!-- <p>One line description.</p> i-->

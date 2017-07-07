@@ -1,13 +1,11 @@
 
 {% extends 'forum/base.html' %}
- {% block breadcrumb %}
+{% block content %}
  <ul class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
     <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
     <li class="breadcrumb-item active">New Thread</li>
  </ul>
- {% endblock breadcrumb %}
-{% block content %}
 <h4>New Thread</h4>
 <form method="POST" class="post-form" action=
       "{% url 'thread_add' category.slug %}" enctype="multipart/form-data">
@@ -20,10 +18,13 @@
 <script>
     var simplemde = new SimpleMDE({ 
         element: document.getElementById("id_text"),
-        autosave: {enabled:true, uniqueId:"new_post", delay:30000,},
+        autosave: {enabled:true, uniqueId:"forum_post", delay:30000,},
         toolbar:(["bold","italic","quote","|","unordered-list",
           "ordered-list","|","table","code","|","link","image","|",
-          "preview","side-by-side","fullscreen","|","guide"])
+          "preview","side-by-side","fullscreen","|","guide"]),
+        hideicons:["fullscreen",],
+        placeholder:"Message",
+        forceSync:true,
     });
 </script>
 {% endblock content %}

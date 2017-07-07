@@ -1,31 +1,33 @@
 {% extends 'forum/base.html' %}
-{% block title %} posts{% endblock title %}
+{% block title %} conversation{% endblock title %}
 {% block searchbar-class %}hidden{% endblock searchbar-class %}
 <!-- block to update value property of element -->
-{% block value %}value="post"{% endblock value %}
 {% block content %}
  <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
-    <li class="breadcrumb-item active">{{ thread.name }}</li>
+    <li class="breadcrumb-item"><a href="#">Topics</a></li>
+    <li class="breadcrumb-item"><a href="#">Profile</a></li>
+    <li class="breadcrumb-item active">{{ conversation.is_with }}</li>
  </ul>
-{% if posts %}
+{% if new_convo %}
+    <h3>Send a private message to <strong>{{ is_with }}</strong></h3>
+{% endif%}
+{% if pms %}
 <div class="row">
 <div class="col-md-1 col-sm-2 col-xs-1"></div>
 <div class="col-md-10 col-sm-8 col-xs-10">
 <div id="search-results">
-    {% for post in posts %}
-        <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
-<div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }}</div></div>
+    {% for pm in pms %}
+        <div class="well well-sm">{{ pm.text|safe }}
+<div class="post-meta small text-muted">{{ pm.author }} | {{ pm.created_date }}</div></div>
     {% endfor %}
 </div>
 {% endif %}
 {% if user.is_authenticated %}
 <form method="POST" class="post-form" action=
-      "{% url 'thread' category.slug thread.slug %}" enctype="multipart/form-data">
+      "{% url 'conversation' user is_with %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" id="submit-post" class="save btn ">Submit Post</button>
+    <button type="submit" id="submit-post" class="save btn ">Submit pm</button>
 </form>
 </div>
 <div class="col-md-1 col-sm-2 col-xs-1"></div>
@@ -34,7 +36,7 @@
 <script>
     var simplemde = new SimpleMDE({ 
         element: document.getElementById("id_text"),
-        autosave: {enabled:true, uniqueId:"forum_post", delay:30000,},
+        autosave: {enabled:true, uniqueId:"pm_post", delay:30000,},
         toolbar:(["bold","italic","quote","|","unordered-list",
           "ordered-list","|","table","code","|","link","image","|",
           "preview","side-by-side","fullscreen","|","guide"]),

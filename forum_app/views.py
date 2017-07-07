@@ -10,9 +10,8 @@ import json
 from markdown import markdown
 import bleach
 
-from forum_app.models import Category, Thread, Post, User, Profile
-from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm
-from forum_app.forms import PostForm
+from forum_app.models import Category, Thread, Post, User, Profile, Conversation, Pm
+from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm, PostForm, PmForm
 
 
 def category_list(request):
@@ -193,7 +192,7 @@ def thread_add(request, category_slug):
                 post.thread = thread
                 post.author = request.user
                 post.new()
-                return redirect('threads', category)
+                return redirect('threads', category.slug)
             else:
                 #TODO render template again, but pass errors to be displayed
                 # I think this will tell us if the object already exits :)
@@ -306,6 +305,7 @@ def register_user(request):
             return render(request, 'forum/register_success.html', context)
         else:
             print(user_form.errors)
+            profile_form = ProfileForm()
             #print(profile_form.errors)
             #error messages?
     else: # blank form
@@ -352,3 +352,102 @@ def profile_list(request):
     return render(request, 'forum/profile_list.html', context)
 
 
+@login_required
+def conversations(request, username):
+    """ View to get all the Conversation objects that belong to a specific User.
+    ARGs:
+        unsername - unique User object (must be logged in user)
+    RET:
+        threads - a list of Thread objects
+        category - a Category object
+    """
+    context = {}
+    user = get_object_or_404(User, username=username)
+    if request.user != user:
+        raise Http404
+    conversations = Conversation.objects.filter(belongs_to=user)
+    context['conversations'] = conversations
+    context['user'] = user
+    #return redirect(reverse('categories'))
+    return render(request, 'forum/conversations.html', context)
+
+@login_required
+def conversation(request, username, is_with):
+    """ Handles PmForm. Creates two instances of the Post, One for the creator
+    and one for the receiver of the message. Each User also has their own
+    Conversation object.
+    """
+    context = {}
+    user = get_object_or_404(User, username=username)
+    is_with = get_object_or_404(User, username=is_with)
+    if request.user != user:
+        raise Http404
+    conversation1 = get_object_or_404(Conversation, belongs_to=user, is_with=is_with)
+    conversation2, created = Conversation.objects.get_or_create(belongs_to=is_with, is_with=user)
+    pms = Pm.objects.filter(conversation=conversation1)
+    context['user'] = user
+    context['is_with'] = is_with
+    context['pms'] = pms
+    context['conversation'] = conversation1
+    if request.method == 'POST':
+        form = PmForm(request.POST, request.FILES)
+        if form.is_valid():
+            pm = form.save(commit=False)
+            text = markdown(bleach.clean(pm.text).replace('&gt;','>'))
+            pm.text = text
+            pm.conversation = conversation1
+            pm.author = request.user
+            pm.save() # change to new() ??
+            pm2 = Pm.objects.create(conversation=conversation2,author=request.user,text=text)
+            pm2.save()
+            return redirect('conversation', user, is_with.username)
+        else:
+            #TODO render template again, but pass errors to be displayed
+            # I think this will tell us if the object already exits :)
+            print(form.errors)
+            context['form'] = form
+    else:
+        form = PmForm()
+        context['form'] = form
+    return render(request, 'forum/conversation.html', context)
+
+@login_required
+def new_conversation(request, username, is_with):
+    """ Handles PmForm. Creates two instances of the Post, One for the creator
+    and one for the receiver of the message. Each User also has their own
+    Conversation object.
+    """
+    context = {}
+    user = get_object_or_404(User, username=username)
+    is_with = get_object_or_404(User, username=is_with)
+    if request.user != user:
+        raise Http404
+    conversation1, created = Conversation.objects.get_or_create(belongs_to=user, is_with=is_with)
+    conversation2, created = Conversation.objects.get_or_create(belongs_to=is_with, is_with=user)
+    #pms = Pm.objects.filter(conversation=conversation1) # may not need
+    context['user'] = user
+    context['is_with'] = is_with
+    context['new_convo'] = True
+    #context['pms'] = pms # may not need
+    #context['conversation'] = conversation1 # may not need
+    if request.method == 'POST':
+        form = PmForm(request.POST, request.FILES)
+        if form.is_valid():
+            pm = form.save(commit=False)
+            text = markdown(bleach.clean(pm.text).replace('&gt;','>'))
+            pm.text = text
+            pm.conversation = conversation1
+            pm.author = request.user
+            pm.save() # change to new() ??
+            pm2 = Pm.objects.create(conversation=conversation2,author=request.user,text=text)
+            pm2.save()
+            return redirect('conversation', user, is_with.username)
+        else:
+            #TODO render template again, but pass errors to be displayed
+            # I think this will tell us if the object already exits :)
+            print(form.errors)
+            context['form'] = form
+    else:
+        form = PmForm()
+        context['form'] = form
+    return render(request, 'forum/conversation.html', context)

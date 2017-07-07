@@ -49,18 +49,13 @@
      <input type="hidden" id="SearchCategory" name="SearchCategory" {% block SearchCategory %}{% endblock SearchCategory %}/>
     </ul>
     <!-- End of Seach bar section -->
-    <!-- <ul id="left-nav" class="nav navbar-nav">
-       <li class="active"><a href="#">Home</a></li>
+     <ul id="left-nav" class="nav navbar-nav theme2">
+       <li><a href="#">Home</a></li>
        <li><a href="#">Page 1</a></li>
-       <li><a href="#">Page 2</a></li>
-     </ul>-->
-     {% block breadcrumb %}
-     <ul class="breadcrumb" style="display:inline-block;">
-         <li class="breadcrumb-item">Home</li>
-         <li class="breadcrumb-item">Library</li>
-         <li class="breadcrumb-item active">Data</li>
+       {% if user.is_authenticated %}
+       <li><a href="{% url 'conversations' user %}">Messages</a></li>
+       {% endif %}
      </ul>
-     {% endblock breadcrumb %}
         <!-- right navbar section -->
      <ul class="nav navbar-nav navbar-right">
      <!--    <li>

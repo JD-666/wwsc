@@ -137,8 +137,34 @@ class Post(models.Model):
        self.save(*args, **kwargs)
        return
 
-
    def __str__(self):
        return self.text
 
-    
+class Conversation(models.Model):
+    """ Object to keep track of a group of Pm objects (Private Messages) and 
+    associate them with two specific users. We will create two conversation
+    objects for each conversation. One belonging to each User participating
+    in the conversation.
+    """
+    belongs_to = models.ForeignKey(User, related_name='conversation_belongs_to')
+    is_with = models.ForeignKey(User, related_name='conversation_is_with')
+
+
+class Pm(models.Model):
+    """ Private Message object. We will create two instances of each Pm and
+    assign one to each Conversation instance. Essentially each User will have 
+    his own copy of a Pm (This way one user can delete their Pm's, and it won't
+    delete it for the other user too).
+    """
+    text = models.TextField()
+    author = models.ForeignKey(User)
+    created_date = models.DateTimeField(default=timezone.now)
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['created_date']
+        
+    def __str__(self):
+        return self.text
+
+
