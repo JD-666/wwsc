@@ -18,6 +18,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # additional attributes we wish to add
     picture = models.ImageField(upload_to='profile_pics', blank=True, null=True)
+    rank = models.IntegerField(default=0)
 
     def get_upload_name(instance, filename):
         """ NOT CURRENTLY IN USE, WILL HAVE THE VIEW HANDLE THIS. 
@@ -112,6 +113,7 @@ class Thread(models.Model):
     def new(self, *args, **kwargs):
         self.slug = slugify(self.name)
         self.category.num_threads += 1
+        self.author.profile.rank += 5
         self.save(*args, **kwargs)
         return
 
@@ -120,25 +122,37 @@ class Thread(models.Model):
 
 
 class Post(models.Model):
-   """ DB model to store content of a specific Category->Thread->Post. 
-   """
-   text = models.TextField()
-   author = models.ForeignKey(User)
-   thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
-   created_date = models.DateTimeField(default=timezone.now)
+    """ DB model to store content of a specific Category->Thread->Post. 
+    """
+    text = models.TextField()
+    author = models.ForeignKey(User)
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(default=timezone.now)
+    likes = models.IntegerField(default=0)
 
-   def new(self, *args, **kwargs):
-       self.thread.most_recent_post = self.created_date
-       self.thread.num_posts += 1
-       self.thread.category.most_recent_post = self.created_date
-       self.thread.category.num_posts += 1
-       self.thread.save()
-       self.thread.category.save()
-       self.save(*args, **kwargs)
-       return
+    def new(self, *args, **kwargs):
+        self.thread.most_recent_post = self.created_date
+        self.thread.num_posts += 1
+        self.thread.category.most_recent_post = self.created_date
+        self.thread.category.num_posts += 1
+        self.thread.save()
+        self.thread.category.save()
+        self.author.profile.rank += 1
+        self.save(*args, **kwargs)
+        return
 
-   def __str__(self):
-       return self.text
+    def like(self):
+        self.likes += 1
+        self.author.profile.rank += 1
+        return
+
+    def dislike(self):
+        self.likes -= 1
+        self.author.profile.rank -= 1
+        return
+
+    def __str__(self):
+        return self.text
 
 class Conversation(models.Model):
     """ Object to keep track of a group of Pm objects (Private Messages) and 

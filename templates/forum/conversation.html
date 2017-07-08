@@ -2,12 +2,12 @@
 {% block title %} conversation{% endblock title %}
 {% block searchbar-class %}hidden{% endblock searchbar-class %}
 <!-- block to update value property of element -->
-{% block content %}
- <ul class="breadcrumb">
+{% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="#">Topics</a></li>
     <li class="breadcrumb-item"><a href="#">Profile</a></li>
     <li class="breadcrumb-item active">{{ conversation.is_with }}</li>
- </ul>
+{% endblock breadcrumbs %}
+{% block content %}
 {% if new_convo %}
     <h3>Send a private message to <strong>{{ is_with }}</strong></h3>
 {% endif%}

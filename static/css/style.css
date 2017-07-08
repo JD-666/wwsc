@@ -8,7 +8,8 @@ body {
 }
 
 #wrapper {
-    padding-top:80px;
+    /*padding-top:80px;*/
+    padding-top:50px;
     padding-bottom:300px;
 }
 
@@ -151,9 +152,9 @@ button:hover {
 
 .breadcrumb {
     display:inline-block;
-    max-width:70%;
-    margin-top:8px;
-    margin-left:35px;
+    max-width:100%;
+    margin-top:0px;
+    margin-left:0px;
     margin-bottom:0px;
     padding-top:5px;
     padding-bottom:5px;

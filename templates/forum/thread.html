@@ -2,13 +2,14 @@
 {% block title %} posts{% endblock title %}
 {% block searchbar-class %}hidden{% endblock searchbar-class %}
 <!-- block to update value property of element -->
+{% block breadcrumbs %}
+   <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
+   <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
+   <li class="breadcrumb-item active">{{ thread.name }}</li>
+{% endblock breadcrumbs %}
 {% block value %}value="post"{% endblock value %}
 {% block content %}
- <ul class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'threads' category.slug %}">{{ category.name }}</a></li>
-    <li class="breadcrumb-item active">{{ thread.name }}</li>
- </ul>
+<br/>
 {% if posts %}
 <div class="row">
 <div class="col-md-1 col-sm-2 col-xs-1"></div>
@@ -16,7 +17,7 @@
 <div id="search-results">
     {% for post in posts %}
         <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
-<div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }}</div></div>
+<div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }} | <a href="{% url 'new_conversation' request.user post.author %}">message</a></div></div>
     {% endfor %}
 </div>
 {% endif %}

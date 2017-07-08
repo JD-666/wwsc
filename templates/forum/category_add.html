@@ -1,14 +1,9 @@
-
 {% extends 'forum/base.html' %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
+    <li class="breadcrumb-item active">New Topic</li>
+{% endblock breadcrumbs %}
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-      <ul class="breadcrumb" style="display:inline-block;">
-        <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
-        <li class="breadcrumb-item active">New Topic</li>
-      </ul>
-    </div>
-</div>
 <h4>This is a new category</h4>
 <form method="POST" class="post-form" action=
       "{% url 'category_add' %}" enctype="multipart/form-data">
