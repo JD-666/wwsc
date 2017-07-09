@@ -26,18 +26,8 @@
     <div class="row"><div class="col-md-12"><hr style="margin-top:0px; margin-left:12px; margin-right:12px;"></div></div>
 </div>
 {% if threads %}
-<table class="table table-hover table-condensed theme2">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Posts</th>
-        <th>Originator</th>
-        <th>Activity</th>
-      </tr>
-    </thead>
-    <tbody id="search-results">
-        {% thread_table_rows %}
-    </tbody>
-</table>
+<div id="search-results">
+    {% thread_table_rows %}
+</div>
 {% endif %}
 {% endblock content %}

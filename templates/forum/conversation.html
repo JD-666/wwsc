@@ -29,6 +29,25 @@
     {{ form.as_p }}
     <button type="submit" id="submit-post" class="save btn ">Submit pm</button>
 </form>
+  <div class="bot-pagination">
+    <ul class="pagination pagination-sm">
+    {% if pms.has_other_pages %}
+        {% if pms.has_previous %}
+            <li><a href="?page={{ pms.previous_page_number }}"><</a></li>
+        {% endif %}
+        {% for page_num in paginator.page_range %}
+            {% if page_num == pms.number %}
+                <li class="active"><a>{{ page_num }}</a></li>
+            {% else %}
+                <li><a href = "?page={{ page_num }}">{{ page_num }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if pms.has_next %}
+            <li><a href="?page={{ pms.next_page_number }}">></a></li>
+        {% endif %} 
+    {% endif %}
+    </ul>
+  </div>
 </div>
 <div class="col-md-1 col-sm-2 col-xs-1"></div>
 </div>

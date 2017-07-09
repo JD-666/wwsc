@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from datetime import datetime
 import json
 from markdown import markdown
@@ -36,8 +38,24 @@ def thread_list(request, category_slug):
     """
     context = {}
     category = get_object_or_404(Category, slug=category_slug)
-    threads = category.thread_set.all().order_by('-most_recent_post',
+    if 'query' in request.GET:
+        query = bleach.clean(request.GET.get('query'))
+        context['query'] = query
+        thread_list = category.thread_set.filter(category=category,name__contains=query).order_by(
+                      '-most_recent_post','created_date')
+    else:
+        thread_list = category.thread_set.all().order_by('-most_recent_post',
               'created_date')
+    paginator = Paginator(thread_list, 3) # show 10 threads per page
+    if 'page' in request.GET:
+        page = request.GET.get('page')
+        try:
+            threads = paginator.page(page)
+        except:
+            threads = paginator.page(1) # default to first page
+    else:
+        threads = paginator.page(1)
+    context['paginator'] = paginator
     context['threads'] = threads
     context['category'] = category
     return render(request, 'forum/thread_list.html', context)
@@ -56,11 +74,6 @@ def thread(request, category_slug, thread_slug):
     context = {}
     thread = get_object_or_404(Thread, slug=thread_slug)
     category = get_object_or_404(Category, slug=category_slug)
-    posts = thread.post_set.all().order_by('created_date')
-    context['posts'] = posts
-    context['thread'] = thread
-    context['category'] = category
-
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -69,7 +82,7 @@ def thread(request, category_slug, thread_slug):
             post.thread = thread
             post.author = request.user
             post.new()
-            return redirect('thread', category_slug, thread_slug)
+            return redirect('thread', category.slug, thread.slug)
         else:
             #TODO render template again, but pass errors to be displayed
             # I think this will tell us if the object already exits :)
@@ -79,6 +92,24 @@ def thread(request, category_slug, thread_slug):
         form = PostForm()
         context['form'] = form
 
+    post_list = thread.post_set.all().order_by('created_date')
+    paginator = Paginator(post_list, 2) # show 10 posts per page
+    if 'page' in request.GET:
+        page = request.GET.get('page')
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            # If page not an int, deliver first page
+            posts = paginator.page(1)
+        except EmptyPage:
+            # If page is out or range (i.e. 9999), deliver last page
+            posts = paginator.page(paginator.num_pages)
+    else:
+        posts = paginator.page(paginator.num_pages)
+    context['paginator'] = paginator
+    context['posts'] = posts
+    context['thread'] = thread
+    context['category'] = category
     return render(request, 'forum/thread.html', context)
 
 @login_required
@@ -224,21 +255,44 @@ def search_bar(request):
         object - the type of DB object model
         category_slug* - Category that current Thread set belong to.
     """
+    context = {}
     if request.method == 'POST':
         # The JS Ajax func gets the search_object from a hidden input element
         search_type = request.POST['search_type']
         search_text = request.POST['search_text']
+        ###########################################################
+        # Category ajax search
+        ###########################################################
         if search_type == 'category':
             categories = Category.objects.filter(name__contains=search_text).order_by(
                                '-most_recent_post')
             context = {'categories':categories, 'object':search_type}
+        ###########################################################
+        # Thread ajax search
+        ###########################################################
         elif search_type == 'thread':
             cat_slug = request.POST['search_category']
             cat = get_object_or_404(Category, slug=cat_slug)
-            threads = Thread.objects.filter(category=cat,name__contains=search_text).order_by(
+            query = bleach.clean(search_text)
+            context['query'] = query
+            thread_list = Thread.objects.filter(category=cat,name__contains=query).order_by(
                              '-most_recent_post','created_date')
-            context = {'threads':threads, 'object':search_type,
-                       'category':cat}
+            paginator = Paginator(thread_list, 3) # show 10 threads per page
+            if 'page' in request.GET:
+                page = request.GET.get('page')
+                try:
+                    threads = paginator.page(page)
+                except:
+                    threads = paginator.page(1) # defualt to first page
+            else:
+                threads = paginator.page(1)
+            context['paginator'] = paginator
+            context['threads'] = threads
+            context['object'] = search_type
+            context['category'] = cat
+        ###########################################################
+        # Post ajax search ( currently NOT in use )
+        ###########################################################
         elif search_type == 'post':
             results = Post.objects.filter(text__contains=search_text).order_by(
                            '-most_recent_post','created_date')
@@ -246,6 +300,9 @@ def search_bar(request):
         else:
             results = ''
             context = {'results':results, 'object':search_type}
+        ###########################################################
+        # No or Invalid search_type passed
+        ###########################################################
     else:
         raise Http404
     return render(request, 'forum/ajax_search.html', context)
@@ -365,7 +422,17 @@ def conversations(request, username):
     user = get_object_or_404(User, username=username)
     if request.user != user:
         raise Http404
-    conversations = Conversation.objects.filter(belongs_to=user)
+    conversation_list = Conversation.objects.filter(belongs_to=user)
+    paginator = Paginator(conversation_list, 3) # show 10 conversations per page
+    if 'page' in request.GET:
+        page = request.GET.get('page')
+        try:
+            conversations = paginator.page(page)
+        except:
+            conversations = paginator.page(1) # defualt to first page
+    else:
+        conversations = paginator.page(1)
+    context['paginator'] = paginator
     context['conversations'] = conversations
     context['user'] = user
     #return redirect(reverse('categories'))
@@ -384,10 +451,8 @@ def conversation(request, username, is_with):
         raise Http404
     conversation1 = get_object_or_404(Conversation, belongs_to=user, is_with=is_with)
     conversation2, created = Conversation.objects.get_or_create(belongs_to=is_with, is_with=user)
-    pms = Pm.objects.filter(conversation=conversation1)
     context['user'] = user
     context['is_with'] = is_with
-    context['pms'] = pms
     context['conversation'] = conversation1
     if request.method == 'POST':
         form = PmForm(request.POST, request.FILES)
@@ -409,6 +474,23 @@ def conversation(request, username, is_with):
     else:
         form = PmForm()
         context['form'] = form
+
+    pm_list = Pm.objects.filter(conversation=conversation1)
+    paginator = Paginator(pm_list, 2) # show 10 posts per page
+    if 'page' in request.GET:
+        page = request.GET.get('page')
+        try:
+            pms = paginator.page(page)
+        except PageNotAnInteger:
+            # If page not an int, deliver first page
+            pms = paginator.page(1)
+        except EmptyPage:
+            # If page is out or range (i.e. 9999), deliver last page
+            pms = paginator.page(paginator.num_pages)
+    else:
+        pms = paginator.page(paginator.num_pages)
+    context['paginator'] = paginator
+    context['pms'] = pms
     return render(request, 'forum/conversation.html', context)
 
 @login_required

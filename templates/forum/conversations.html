@@ -51,5 +51,24 @@
         {% endfor %}
     </tbody>
 </table>
+{% if conversations.has_other_pages %}
+<div class="bot-pagination">
+    <ul class="pagination pagination-sm">
+        {% if conversations.has_previous %}
+            <li><a href="?page={{ conversations.previous_page_number }}"><</a></li>
+        {% endif %}
+        {% for page_num in paginator.page_range %}
+            {% if page_num == conversations.number %}
+                <li class="active"><a>{{ page_num }}</a></li>
+            {% else %}
+                <li><a href = "?page={{ page_num }}{% if query %}&query={{ query }}{% endif %}">{{ page_num }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if conversations.has_next %}
+            <li><a href="?page={{ conversations.next_page_number }}">></a></li>
+        {% endif %} 
+    </ul>
+</div>
+{% endif %}
 {% endif %}
 {% endblock content %}

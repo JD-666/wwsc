@@ -168,3 +168,23 @@ button:hover {
     display:inline;
 }
 
+.bot-pagination {
+    text-align:center;
+}
+
+.pagination li a {
+    color:#263238;
+    border:1px solid #263238;
+}
+
+.pagination .active a {
+    color:#f1f4f0;
+    background-color:#37474F;
+    border:1px solid #263238;
+    pointer-events:none;
+}
+.pagination li a:hover {
+    color:#f1f4f0;
+    border:1px solid #263238;
+    background-color:#8da59a;
+}
