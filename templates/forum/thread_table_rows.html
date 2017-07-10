@@ -1,13 +1,44 @@
 {% load tag_filter_extra %}
-{% for thread in threads %}
-<tr>
-  <td>
-    <a href="{% url 'thread' category.slug thread.slug %}">
-       {{ thread.name }}
-    </a>
-  </td>
-  <td>{{ thread.num_posts }}</td>
-  <td>{{ thread.author }}</td>
-  <td>{{ thread.most_recent_post|time_since }}</td>
-</tr>
-{% endfor %}
+<table class="table table-hover table-condensed theme2">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Posts</th>
+        <th>Originator</th>
+        <th>Activity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for thread in threads %}
+      <tr>
+        <td>
+          <a href="{% url 'thread' category.slug thread.slug %}">
+            {{ thread.name }}
+          </a>
+        </td>
+        <td>{{ thread.num_posts }}</td>
+        <td>{{ thread.author }}</td>
+        <td>{{ thread.most_recent_post|time_since }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+{% if threads.has_other_pages %}
+<div class="bot-pagination">
+    <ul class="pagination pagination-sm">
+        {% if threads.has_previous %}
+            <li><a href="?page={{ threads.previous_page_number }}{% if query %}&query={{ query }}{% endif %}"><</a></li>
+        {% endif %}
+        {% for page_num in paginator.page_range %}
+            {% if page_num == threads.number %}
+                <li class="active"><a>{{ page_num }}</a></li>
+            {% else %}
+                <li><a href = "?page={{ page_num }}{% if query %}&query={{ query }}{% endif %}">{{ page_num }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if threads.has_next %}
+            <li><a href="?page={{ threads.next_page_number }}{% if query %}&query={{ query }}{% endif %}">></a></li>
+        {% endif %} 
+    </ul>
+</div>
+{% endif %}

@@ -8,8 +8,9 @@ body {
 }
 
 #wrapper {
-    padding-top:80px;
-    padding-bottom:150px;
+    /*padding-top:80px;*/
+    padding-top:50px;
+    padding-bottom:300px;
 }
 
 #footer {
@@ -23,15 +24,35 @@ body {
 
 /*  font-family: 'Rationale', sans-serif;
     font-family: 'Roboto', sans-serif;*/
+a {
+    color:#263238;
+}
+button {
+    background-color:#37474F;
+    color:#f1f4f0;
+}
+button:hover {
+    background-color:#f1f4f0;
+    color:#263238;
+    border:1px solid #263238;
+}
 
 #search-div {
     margin-bottom:0px;
+    color:#263238;
 }
 
 #search {
     margin-top:8px;
     width:150px;
     padding-right:22px;
+    border:0px;
+}
+#search:focus {
+    box-shadow:0 0 6px #f1f4f0;
+}
+#searchIcon {
+    color:#263238;
 }
 
 .theme {
@@ -47,6 +68,12 @@ body {
     font-family: 'Rationale', sans-serif;
     padding-left:45px;
     padding-right:25px;
+    transition:all 2s;
+}
+.navbar-brand:hover {
+    transform:rotate(360deg);
+    -webkit-transform:rotate(360deg);
+    -ms-transform:rotate(360deg);
 }
 
 .navbar {
@@ -80,7 +107,13 @@ body {
     background-size:cover;
     border-radius:10px;
     border:1px solid #263238;
+    transition:box-shadow 0.6s, all 0.6s;
 }
+.img:hover{
+    box-shadow:0 0 70px #ffff80;
+    transform:scale(1.05);
+}
+
 
 .portfolio-item {
     margin-bottom:10px;
@@ -90,16 +123,21 @@ body {
 }
 
 .portfolio-item h4 {
-    margin-bottom:2px;
+    margin-bottom:3px;
 }
 
 .well {
     font-family: 'Roboto', sans-serif;
     white-space:pre-wrap;
     word-wrap:break-word;
+    overflow:hidden;
     margin-bottom:10px;
     /*background-color:#e3e9e2;*/
     background-color:#f1f4f0;
+}
+
+.CodeMirror-focused {
+    box-shadow:3px 3px 3px #263238;
 }
 
 .post-meta {
@@ -114,9 +152,9 @@ body {
 
 .breadcrumb {
     display:inline-block;
-    max-width:70%;
-    margin-top:8px;
-    margin-left:35px;
+    max-width:100%;
+    margin-top:0px;
+    margin-left:0px;
     margin-bottom:0px;
     padding-top:5px;
     padding-bottom:5px;
@@ -130,3 +168,23 @@ body {
     display:inline;
 }
 
+.bot-pagination {
+    text-align:center;
+}
+
+.pagination li a {
+    color:#263238;
+    border:1px solid #263238;
+}
+
+.pagination .active a {
+    color:#f1f4f0;
+    background-color:#37474F;
+    border:1px solid #263238;
+    pointer-events:none;
+}
+.pagination li a:hover {
+    color:#f1f4f0;
+    border:1px solid #263238;
+    background-color:#8da59a;
+}

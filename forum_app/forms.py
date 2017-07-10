@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
-from forum_app.models import Profile, Category, Thread, Post
+from forum_app.models import Profile, Category, Thread, Post, Conversation, Pm
 
 
 class CategoryForm(forms.ModelForm):
@@ -18,6 +18,10 @@ class ThreadForm(forms.ModelForm):
     class Meta:
         model = Thread
         fields = ('name',)
+    def __init__(self, *args, **kwargs):
+        super(ThreadForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update(
+            {'style':"width:100%"})
 
 
 class PostForm(forms.ModelForm):
@@ -26,6 +30,11 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ('text',)
 
+class PmForm(forms.ModelForm):
+    text = forms.CharField(widget=forms.Textarea, required=True)
+    class Meta:
+        model = Pm
+        fields = ('text',)
 
 class UserForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs=

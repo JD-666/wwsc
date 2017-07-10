@@ -1,0 +1,74 @@
+{% extends 'forum/base.html' %}
+{% load tag_filter_extra %}
+{% block title %} conversations{% endblock title %}
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
+ {% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="#">Topics</a></li>
+    <li class="breadcrumb-item"><a href="#">Profile</a></li>
+    <li class="breadcrumb-item active">Conversations</li>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="row theme2">
+    <div class="row">
+        <div class="col-md-10">
+            <h2 style="padding-left:12px;"><a href="#">{{ user.username }}</a></h2>
+        </div>
+        <div class="col-md-2">
+            {% if user.is_authenticated %}
+            <h2><small>
+            <a href="{% url 'conversation' user 'jack' %}">
+            <span class="glyphicon glyphicon-plus pull-right" style="padding-right:12px; padding-top:10px;"></span>
+            </a></small></h2>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row"><div class="col-md-12"><hr style="margin-top:0px; margin-left:12px; margin-right:12px;"></div></div>
+</div>
+{% if conversations %}
+<table class="table table-hover table-condensed theme2">
+    <thead>
+      <tr>
+        <th>Conversation</th>
+        <th>Messages</th>
+        <th>Activity</th>
+      </tr>
+    </thead>
+    <tbody id="search-results">
+        {% for conversation in conversations %}
+            <tr>
+                <td>
+                    <a href="{% url 'conversation' user conversation.is_with %}">
+                    {{ conversation.is_with }}
+                    </a>
+                </td>
+                <td>{{ conversation.pm_set.all.count }}</td>
+                <td>
+                {% with conversation.pm_set.last as last_pm %}
+                    {{ last_pm.created_date|time_since }}
+                {% endwith %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if conversations.has_other_pages %}
+<div class="bot-pagination">
+    <ul class="pagination pagination-sm">
+        {% if conversations.has_previous %}
+            <li><a href="?page={{ conversations.previous_page_number }}"><</a></li>
+        {% endif %}
+        {% for page_num in paginator.page_range %}
+            {% if page_num == conversations.number %}
+                <li class="active"><a>{{ page_num }}</a></li>
+            {% else %}
+                <li><a href = "?page={{ page_num }}{% if query %}&query={{ query }}{% endif %}">{{ page_num }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if conversations.has_next %}
+            <li><a href="?page={{ conversations.next_page_number }}">></a></li>
+        {% endif %} 
+    </ul>
+</div>
+{% endif %}
+{% endif %}
+{% endblock content %}

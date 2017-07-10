@@ -1,10 +1,8 @@
 {% extends 'forum/base.html' %}
- {% block breadcrumb %}
- <ul class="breadcrumb">
+ {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
     <li class="breadcrumb-item active">Register Success</li>
- </ul>
- {% endblock breadcrumb %}
+ {% endblock breadcrumbs %}
 {% block content %}
 <h4>Yo {{ username }}, you now have an account brother!</h4>
 <p>Try logging in.</p>
