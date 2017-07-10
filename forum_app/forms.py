@@ -18,6 +18,10 @@ class ThreadForm(forms.ModelForm):
     class Meta:
         model = Thread
         fields = ('name',)
+    def __init__(self, *args, **kwargs):
+        super(ThreadForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update(
+            {'style':"width:100%"})
 
 
 class PostForm(forms.ModelForm):

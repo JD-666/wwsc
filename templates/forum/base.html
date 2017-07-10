@@ -40,7 +40,7 @@
     <ul class="nav navbar-nav {% block searchbar-class %}{% endblock %}">
      {% csrf_token %}
      <div id="search-div" class="form-group has-success has-feedback">
-         <input type="text" id="search" class="form-control input-sm" name="search" placeholder="Filter"/>
+         <input type="text" id="search" class="form-control input-sm" name="search" value="{% block search_val %}{% endblock %}" placeholder="Filter"/>
          <i id="searchIcon" class="glyphicon glyphicon-search form-control-feedback"></i>
      </div> 
      <!-- special field to identify the type of search (based on current page) -->

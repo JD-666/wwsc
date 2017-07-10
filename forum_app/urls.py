@@ -11,8 +11,6 @@ urlpatterns =[
     url(r'^ajax_login/$', views.ajax_login, name='ajax_login'),
     url(r'^register/$', views.register_user, name='register'),
     url(r'^profile/(?P<username>[\w]+)/$', views.profile, name='profile'),
-    url(r'^profile/(?P<username>[\w]+)/new-conversation/(?P<is_with>[\w]+)/$', views.new_conversation,
-        name='new_conversation'),
     url(r'^profile/(?P<username>[\w]+)/conversations/$', views.conversations,
         name='conversations'),
     url(r'^profile/(?P<username>[\w]+)/conversations/(?P<is_with>[\w]+)/$',

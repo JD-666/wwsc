@@ -10,6 +10,8 @@
 {% block content %}
 {% if new_convo %}
     <h3>Send a private message to <strong>{{ is_with }}</strong></h3>
+{% else %}
+    <h3>Private Messages with <strong>{{ is_with }}</strong></h3>
 {% endif%}
 {% if pms %}
 <div class="row">
@@ -17,8 +19,11 @@
 <div class="col-md-10 col-sm-8 col-xs-10">
 <div id="search-results">
     {% for pm in pms %}
+       {% spaceless %}
         <div class="well well-sm">{{ pm.text|safe }}
-<div class="post-meta small text-muted">{{ pm.author }} | {{ pm.created_date }}</div></div>
+        <div class="post-meta small text-muted">{{ pm.author }} | {{ pm.created_date }}</div>
+        </div>
+        {% endspaceless %}
     {% endfor %}
 </div>
 {% endif %}

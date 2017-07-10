@@ -4,6 +4,7 @@
 <!-- block to update value property of element -->
     {% block SearchType %}value="thread"{% endblock SearchType %}
     {% block SearchCategory %}value="{{ category.slug }}"{% endblock SearchCategory %}
+    {% block search_val %}{{ query }}{% endblock search_val %}
 {% block breadcrumbs %}
         <li class="breadcrumb-item"><a href="{% url 'categories' %}">Topics</a></li>
         <li class="breadcrumb-item active">{{ category.name }}</li>

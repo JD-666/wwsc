@@ -1,7 +1,7 @@
 {% extends 'forum/base.html' %}
 {% load tag_filter_extra %}
 {% block title %} conversations{% endblock title %}
-<!-- block to update value property of element -->
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
  {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="#">Topics</a></li>
     <li class="breadcrumb-item"><a href="#">Profile</a></li>
@@ -16,7 +16,7 @@
         <div class="col-md-2">
             {% if user.is_authenticated %}
             <h2><small>
-            <a href="{% url 'new_conversation' user 'jack' %}">
+            <a href="{% url 'conversation' user 'jack' %}">
             <span class="glyphicon glyphicon-plus pull-right" style="padding-right:12px; padding-top:10px;"></span>
             </a></small></h2>
             {% endif %}

@@ -46,7 +46,7 @@ def thread_list(request, category_slug):
     else:
         thread_list = category.thread_set.all().order_by('-most_recent_post',
               'created_date')
-    paginator = Paginator(thread_list, 3) # show 10 threads per page
+    paginator = Paginator(thread_list, 100) # show 10 threads per page
     if 'page' in request.GET:
         page = request.GET.get('page')
         try:
@@ -93,7 +93,7 @@ def thread(request, category_slug, thread_slug):
         context['form'] = form
 
     post_list = thread.post_set.all().order_by('created_date')
-    paginator = Paginator(post_list, 2) # show 10 posts per page
+    paginator = Paginator(post_list, 50) # show 10 posts per page
     if 'page' in request.GET:
         page = request.GET.get('page')
         try:
@@ -147,7 +147,6 @@ def category_add(request):
         form = CategoryForm(request.POST, request.FILES)
         if form.is_valid():
             category = form.save(commit=False)
-            print("category.name = {}".format(category.name))
             if category.name.lower() not in banned_cat_names:
                 category.new()
                 return redirect('categories')
@@ -277,7 +276,7 @@ def search_bar(request):
             context['query'] = query
             thread_list = Thread.objects.filter(category=cat,name__contains=query).order_by(
                              '-most_recent_post','created_date')
-            paginator = Paginator(thread_list, 3) # show 10 threads per page
+            paginator = Paginator(thread_list, 100) # show 10 threads per page
             if 'page' in request.GET:
                 page = request.GET.get('page')
                 try:
@@ -336,7 +335,6 @@ def ajax_login(request):
             elif remember == 'true':
                 settings.SESSION_EXPIRE_AT_BROWSER_CLOSE = False
     else:
-        print("User does not exist!")
         fail_str = '<div id="login-result" class="text-danger fail"><p>Username does not exist...</p></div>'
         response_data['result'] = fail_str
     return HttpResponse(json.dumps(response_data), 
@@ -355,7 +353,6 @@ def register_user(request):
             profile_form = ProfileForm(request.POST, request.FILES,
                            instance=user.profile)
             if profile_form.is_valid():
-                print("profile form is valid!!")
                 profile_form.save()
             #return redirect('categories')
             context = {'username':user.username}
@@ -423,7 +420,7 @@ def conversations(request, username):
     if request.user != user:
         raise Http404
     conversation_list = Conversation.objects.filter(belongs_to=user)
-    paginator = Paginator(conversation_list, 3) # show 10 conversations per page
+    paginator = Paginator(conversation_list, 100) # show 10 conversations per page
     if 'page' in request.GET:
         page = request.GET.get('page')
         try:
@@ -447,16 +444,24 @@ def conversation(request, username, is_with):
     context = {}
     user = get_object_or_404(User, username=username)
     is_with = get_object_or_404(User, username=is_with)
-    if request.user != user:
+    if request.user == is_with:
         raise Http404
-    conversation1 = get_object_or_404(Conversation, belongs_to=user, is_with=is_with)
-    conversation2, created = Conversation.objects.get_or_create(belongs_to=is_with, is_with=user)
+    try: # get current convo if it exists with user (but don't create one if not)
+        conversation1 = Conversation.objects.get(belongs_to=user, is_with=is_with)
+    except Conversation.DoesNotExist:
+        conversation1 = None
+        context['new_convo'] = True
     context['user'] = user
     context['is_with'] = is_with
-    context['conversation'] = conversation1
-    if request.method == 'POST':
+    ######################################################
+    # If this is a form submission
+    ######################################################
+    if request.method == 'POST': 
         form = PmForm(request.POST, request.FILES)
         if form.is_valid():
+            # only create conversation objects if form submission was valid
+            conversation1, created1= Conversation.objects.get_or_create(belongs_to=user, is_with=is_with)
+            conversation2, created2= Conversation.objects.get_or_create(belongs_to=is_with, is_with=user)
             pm = form.save(commit=False)
             text = markdown(bleach.clean(pm.text).replace('&gt;','>'))
             pm.text = text
@@ -471,65 +476,30 @@ def conversation(request, username, is_with):
             # I think this will tell us if the object already exits :)
             print(form.errors)
             context['form'] = form
+    ######################################################
+    # Else, render blank form
+    ######################################################
     else:
         form = PmForm()
         context['form'] = form
-
-    pm_list = Pm.objects.filter(conversation=conversation1)
-    paginator = Paginator(pm_list, 2) # show 10 posts per page
-    if 'page' in request.GET:
-        page = request.GET.get('page')
-        try:
-            pms = paginator.page(page)
-        except PageNotAnInteger:
-            # If page not an int, deliver first page
-            pms = paginator.page(1)
-        except EmptyPage:
-            # If page is out or range (i.e. 9999), deliver last page
+    ######################################################
+    # If a conversation already exists, show it rather than just a blank form
+    ######################################################
+    if conversation1: # only if convo object existed do we bother getting pages
+        pm_list = Pm.objects.filter(conversation=conversation1)
+        paginator = Paginator(pm_list, 50)
+        if 'page' in request.GET:
+            page = request.GET.get('page')
+            try:
+                pms = paginator.page(page)
+            except PageNotAnInteger:
+                # If page not an int, deliver first page
+                pms = paginator.page(1)
+            except EmptyPage:
+                # If page is out or range (i.e. 9999), deliver last page
+                pms = paginator.page(paginator.num_pages)
+        else:
             pms = paginator.page(paginator.num_pages)
-    else:
-        pms = paginator.page(paginator.num_pages)
-    context['paginator'] = paginator
-    context['pms'] = pms
-    return render(request, 'forum/conversation.html', context)
-
-@login_required
-def new_conversation(request, username, is_with):
-    """ Handles PmForm. Creates two instances of the Post, One for the creator
-    and one for the receiver of the message. Each User also has their own
-    Conversation object.
-    """
-    context = {}
-    user = get_object_or_404(User, username=username)
-    is_with = get_object_or_404(User, username=is_with)
-    if request.user != user:
-        raise Http404
-    conversation1, created = Conversation.objects.get_or_create(belongs_to=user, is_with=is_with)
-    conversation2, created = Conversation.objects.get_or_create(belongs_to=is_with, is_with=user)
-    #pms = Pm.objects.filter(conversation=conversation1) # may not need
-    context['user'] = user
-    context['is_with'] = is_with
-    context['new_convo'] = True
-    #context['pms'] = pms # may not need
-    #context['conversation'] = conversation1 # may not need
-    if request.method == 'POST':
-        form = PmForm(request.POST, request.FILES)
-        if form.is_valid():
-            pm = form.save(commit=False)
-            text = markdown(bleach.clean(pm.text).replace('&gt;','>'))
-            pm.text = text
-            pm.conversation = conversation1
-            pm.author = request.user
-            pm.save() # change to new() ??
-            pm2 = Pm.objects.create(conversation=conversation2,author=request.user,text=text)
-            pm2.save()
-            return redirect('conversation', user, is_with.username)
-        else:
-            #TODO render template again, but pass errors to be displayed
-            # I think this will tell us if the object already exits :)
-            print(form.errors)
-            context['form'] = form
-    else:
-        form = PmForm()
-        context['form'] = form
+        context['paginator'] = paginator
+        context['pms'] = pms
     return render(request, 'forum/conversation.html', context)

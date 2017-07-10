@@ -27,7 +27,7 @@
 <div class="bot-pagination">
     <ul class="pagination pagination-sm">
         {% if threads.has_previous %}
-            <li><a href="?page={{ threads.previous_page_number }}"><</a></li>
+            <li><a href="?page={{ threads.previous_page_number }}{% if query %}&query={{ query }}{% endif %}"><</a></li>
         {% endif %}
         {% for page_num in paginator.page_range %}
             {% if page_num == threads.number %}
@@ -37,7 +37,7 @@
             {% endif %}
         {% endfor %}
         {% if threads.has_next %}
-            <li><a href="?page={{ threads.next_page_number }}">></a></li>
+            <li><a href="?page={{ threads.next_page_number }}{% if query %}&query={{ query }}{% endif %}">></a></li>
         {% endif %} 
     </ul>
 </div>
