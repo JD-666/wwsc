@@ -162,6 +162,10 @@ class Conversation(models.Model):
     """
     belongs_to = models.ForeignKey(User, related_name='conversation_belongs_to')
     is_with = models.ForeignKey(User, related_name='conversation_is_with')
+    most_recent_pm = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return str(self.is_with)
 
 
 class Pm(models.Model):
@@ -174,6 +178,12 @@ class Pm(models.Model):
     author = models.ForeignKey(User)
     created_date = models.DateTimeField(default=timezone.now)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.conversation.most_recent_pm = self.created_date
+        self.conversation.save()
+        super(Pm, self).save()
+        return
 
     class Meta:
         ordering = ['created_date']

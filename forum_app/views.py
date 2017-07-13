@@ -419,7 +419,7 @@ def conversations(request, username):
     user = get_object_or_404(User, username=username)
     if request.user != user:
         raise Http404
-    conversation_list = Conversation.objects.filter(belongs_to=user)
+    conversation_list = Conversation.objects.filter(belongs_to=user).order_by('-most_recent_pm','-pk')
     paginator = Paginator(conversation_list, 100) # show 10 conversations per page
     if 'page' in request.GET:
         page = request.GET.get('page')

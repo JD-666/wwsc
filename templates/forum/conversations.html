@@ -5,7 +5,7 @@
  {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="#">Topics</a></li>
     <li class="breadcrumb-item"><a href="#">Profile</a></li>
-    <li class="breadcrumb-item active">Conversations</li>
+    <li class="breadcrumb-item active">Private Messages</li>
 {% endblock breadcrumbs %}
 {% block content %}
 <div class="row theme2">
@@ -43,9 +43,7 @@
                 </td>
                 <td>{{ conversation.pm_set.all.count }}</td>
                 <td>
-                {% with conversation.pm_set.last as last_pm %}
-                    {{ last_pm.created_date|time_since }}
-                {% endwith %}
+                    {{ conversation.most_recent_pm|time_since }}
                 </td>
             </tr>
         {% endfor %}
