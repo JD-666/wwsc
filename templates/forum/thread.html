@@ -18,7 +18,7 @@
     {% for post in posts %}
         {% spaceless %}
         <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
-        <div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }} {% if user.is_authenticated %}| <a href="{% url 'conversation' request.user post.author %}">message</a>{% endif %}</div>
+        <div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }} {% if user.is_authenticated and user != post.author %}| <a href="{% url 'conversation' request.user post.author %}">message</a>{% endif %}</div>
         </div>
         {% endspaceless %}
     {% endfor %}

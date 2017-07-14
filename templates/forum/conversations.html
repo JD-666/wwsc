@@ -45,6 +45,7 @@
                 <td>
                     {{ conversation.most_recent_pm|time_since }}
                 </td>
+                <td><a href="{% url 'delete_conversation' conversation.belongs_to conversation.is_with %}">Delete</a></td>
             </tr>
         {% endfor %}
     </tbody>

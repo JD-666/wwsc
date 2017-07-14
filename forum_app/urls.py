@@ -13,6 +13,8 @@ urlpatterns =[
     url(r'^profile/(?P<username>[\w]+)/$', views.profile, name='profile'),
     url(r'^profile/(?P<username>[\w]+)/conversations/$', views.conversations,
         name='conversations'),
+    url(r'^profile/(?P<username>[\w]+)/conversations/(?P<is_with>[\w]+)/delete/$',
+        views.delete_conversation, name='delete_conversation'),
     url(r'^profile/(?P<username>[\w]+)/conversations/(?P<is_with>[\w]+)/$',
         views.conversation, name='conversation'),
     url(r'^users/$', views.profile_list, name='profile_list'),

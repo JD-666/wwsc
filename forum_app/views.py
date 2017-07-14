@@ -415,6 +415,8 @@ def conversations(request, username):
         threads - a list of Thread objects
         category - a Category object
     """
+    print("In conversations()")
+    user = get_object_or_404(User, username=username)
     context = {}
     user = get_object_or_404(User, username=username)
     if request.user != user:
@@ -432,7 +434,6 @@ def conversations(request, username):
     context['paginator'] = paginator
     context['conversations'] = conversations
     context['user'] = user
-    #return redirect(reverse('categories'))
     return render(request, 'forum/conversations.html', context)
 
 @login_required
@@ -444,6 +445,8 @@ def conversation(request, username, is_with):
     context = {}
     user = get_object_or_404(User, username=username)
     is_with = get_object_or_404(User, username=is_with)
+    if request.user != user:
+        raise Http404
     if request.user == is_with:
         raise Http404
     try: # get current convo if it exists with user (but don't create one if not)
@@ -503,3 +506,22 @@ def conversation(request, username, is_with):
         context['paginator'] = paginator
         context['pms'] = pms
     return render(request, 'forum/conversation.html', context)
+
+@login_required
+def delete_conversation(request, username, is_with):
+    """ 
+    """
+    print("In delete_conversation()")
+    user = get_object_or_404(User, username=username)
+    is_with = get_object_or_404(User, username=is_with)
+    if request.user != user:
+        raise Http404
+    try:
+        conversation = Conversation.objects.get(belongs_to=user, is_with=is_with)
+        print("conversation = {}".format(conversation)) 
+    except Conversation.DoesNotExist:
+        pass
+    else:
+        conversation.delete()
+    finally:
+        return redirect('conversations',username=str(username))
