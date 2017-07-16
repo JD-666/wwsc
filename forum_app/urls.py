@@ -21,6 +21,7 @@ urlpatterns =[
     url(r'^$', views.category_list, name='categories'),
     url(r'^add-category/$', views.category_add,
         name='category_add'),
+    url(r'^like-post/$', views.like_post, name='like_post'),
     url(r'^(?P<category_slug>[\w\-]+)/$', views.thread_list, 
         name='threads'),
     url(r'^(?P<category_slug>[\w\-]+)/edit/$', views.category_edit,

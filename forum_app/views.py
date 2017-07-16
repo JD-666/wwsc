@@ -525,3 +525,38 @@ def delete_conversation(request, username, is_with):
         conversation.delete()
     finally:
         return redirect('conversations',username=str(username))
+
+
+def like_post(request):
+    """ Called by an Ajax POST request. Returns a json object.
+    """
+    user_pk = request.POST.get('user_pk','') # defaults to '' 
+    post_pk = request.POST.get('post_pk','')
+    the_type = request.POST.get('type', 'like')
+    print("user_pk = {}".format(user_pk))
+    print("post_pk = {}".format(post_pk))
+    print("the_type = {}".format(the_type))
+    response_data = {}
+
+    user = get_object_or_404(User,pk=int(user_pk))
+    post = get_object_or_404(Post,pk=int(post_pk))
+    # check to see if user already liked post.
+    # if user hasn't liked post, then like()/dislike() it, and add user to post.liked_by.add(user)
+    
+    # rather than returning 404 if a user already liked a post or user/post doesn't exist.
+    # just return False via json dumps and then hide the like button.
+    print(post.liked_by.all())
+    if user in post.liked_by.all():
+        print("I have already liked this post!!!")
+    else:
+        print("I have not yet liked this post!!!")
+        if the_type == 'like':
+            post.like(user)
+        elif the_type == 'dislike':
+            post.dislike(user)
+        post.save()
+
+    response_data['post_pk'] = post.pk
+    response_data['likes'] = post.likes
+    return HttpResponse(json.dumps(response_data), 
+           content_type='application/json')

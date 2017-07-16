@@ -142,7 +142,18 @@ button:hover {
 
 .post-meta {
     margin-top:10px;
+    margin-bottom:-8px !important;
+    white-space:nowrap;
+}
+#left-post-meta {
+    max-width:80%;
     margin-bottom:-8px;
+    float:left;
+}
+#right-post-meta {
+    max-width:20%;
+    margin-bottom:-8px;
+    float:right;
 }
 
 .thread-header {

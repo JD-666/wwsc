@@ -18,7 +18,20 @@
     {% for post in posts %}
         {% spaceless %}
         <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
-        <div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }} {% if user.is_authenticated and user != post.author %}| <a href="{% url 'conversation' request.user post.author %}">message</a>{% endif %}</div>
+          <div class="post-meta small text-muted">
+            <span id="left-post-meta">
+              {{ post.author }} | Rank {{ post.author.profile.rank }} | {{ post.created_date }}
+              {% if user.is_authenticated and user != post.author %} | 
+                <a href="{% url 'conversation' request.user post.author %}">message</a> | 
+              {% endif %}
+            </span>
+            <span id="right-post-meta">
+                {% if user.is_authenticated and not user in post.liked_by.all %}
+                    <a class="like" href="#" onclick="like_post({{ post.pk }}, 'like')">Like</a> | 
+                    <a class="like" href="#" onclick="like_post({{ post.pk }},'dislike')">Dislike</a>
+                {% endif %}
+              <span style="padding-left:15px;" id="{{ post.id }}"> {{ post.likes }}</span></div>
+            </span>
         </div>
         {% endspaceless %}
     {% endfor %}
@@ -65,5 +78,26 @@
         placeholder:"Message",
         forceSync:true,
     });
+function like_post(pk, type) {
+    /* Uses Ajax to send POST information to be processed by a view. The view
+    sends back a json object with a string in jason.result */
+    $.ajax({
+        type: "POST",
+        url: "/forum/like-post/",
+        datatype: "json",
+        async: true,
+        data: {
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            user_pk: {{ user.pk }},
+            post_pk: pk,
+            type: type,
+            //post_pk: $('#post_id').val(),
+        },
+        success: function (json) {
+            $('#'+json.post_pk).html(json.likes);
+        }
+    });
+    //$('#login-result-div').html('<div id="login-result" class="alert alert-info"><p>Attempting to login...</p></div>');
+}
 </script>
 {% endblock content %}
