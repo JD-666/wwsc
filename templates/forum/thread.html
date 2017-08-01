@@ -1,5 +1,5 @@
 {% extends 'forum/base.html' %}
-{% block title %} posts{% endblock title %}
+{% block title %}posts{% endblock title %}
 {% block searchbar-class %}hidden{% endblock searchbar-class %}
 <!-- block to update value property of element -->
 {% block breadcrumbs %}
@@ -17,7 +17,7 @@
  <div id="search-results">
     {% for post in posts %}
         {% spaceless %}
-        <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
+        <div class="well well-sm">{% if forloop.first and post == initial_post %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
           <div class="post-meta small text-muted">
             <span id="left-post-meta">
               {{ post.author }} | rank {{ post.author.profile.rank }} | {{ post.created_date }}
@@ -82,7 +82,9 @@
     });
 function like_post(pk, type) {
     /* Uses Ajax to send POST information to be processed by a view. The view
-    sends back a json object with a string in jason.result */
+    sends back a json object with a string in jason.result.
+    "pk" is the primary-key of the specific post where the like was clicked.
+    "type" specifies whether this was a (like or dislike) */
     $.ajax({
         type: "POST",
         url: "/forum/like-post/",

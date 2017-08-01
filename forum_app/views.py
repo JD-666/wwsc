@@ -93,6 +93,7 @@ def thread(request, category_slug, thread_slug):
         context['form'] = form
 
     post_list = thread.post_set.all().order_by('created_date')
+    initial_post = post_list[0]
     paginator = Paginator(post_list, 50) # show 10 posts per page
     if 'page' in request.GET:
         page = request.GET.get('page')
@@ -108,6 +109,7 @@ def thread(request, category_slug, thread_slug):
         posts = paginator.page(paginator.num_pages)
     context['paginator'] = paginator
     context['posts'] = posts
+    context['initial_post'] = initial_post
     context['thread'] = thread
     context['category'] = category
     return render(request, 'forum/thread.html', context)
@@ -533,18 +535,9 @@ def like_post(request):
     user_pk = request.POST.get('user_pk','') # defaults to '' 
     post_pk = request.POST.get('post_pk','')
     the_type = request.POST.get('type', 'like')
-    print("user_pk = {}".format(user_pk))
-    print("post_pk = {}".format(post_pk))
-    print("the_type = {}".format(the_type))
     response_data = {}
-
     user = get_object_or_404(User,pk=int(user_pk))
     post = get_object_or_404(Post,pk=int(post_pk))
-    # check to see if user already liked post.
-    # if user hasn't liked post, then like()/dislike() it, and add user to post.liked_by.add(user)
-    
-    # rather than returning 404 if a user already liked a post or user/post doesn't exist.
-    # just return False via json dumps and then hide the like button.
     print(post.liked_by.all())
     if user in post.liked_by.all():
         print("I have already liked this post!!!")
