@@ -67,4 +67,12 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ('picture',)
 
-    
+
+class ContactForm(forms.Form):
+    message = forms.CharField(widget=forms.Textarea, required=True)
+    email = forms.EmailField(required=False, widget=forms.EmailInput(attrs=
+                            {'placeholder':'reply email (optional)'}))
+    def __init__(self, *args, **kwargs):
+        super(ContactForm, self).__init__(*args, **kwargs)
+        self.fields['message'].widget.attrs.update(
+            {'placeholder':'message'})

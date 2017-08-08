@@ -1,0 +1,17 @@
+
+{% extends 'forum/base.html' %}
+{% block title %}Contact{% endblock title %}
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
+{% block breadcrumbs %}
+   <li class="breadcrumb-item"><a href="{% url 'categories' %}">WWSC</a></li>
+   <li class="breadcrumb-item active">Contact</li>
+{% endblock breadcrumbs %}
+{% block content %}
+<h3>Contact</h3>
+<p>A short blurb about sending us feedback. Mention how it can be anonymous or you can leave a reply email.</p>
+<p>Render textarea form. and optional email field</p>
+<form action="{% url 'contact' %}" method="POST">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+{% endblock content %}

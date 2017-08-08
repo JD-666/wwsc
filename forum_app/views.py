@@ -13,7 +13,8 @@ from markdown import markdown
 import bleach
 
 from forum_app.models import Category, Thread, Post, User, Profile, Conversation, Pm
-from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm, PostForm, PmForm
+from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm
+from forum_app.forms import PostForm, PmForm, ContactForm
 
 
 def category_list(request):
@@ -553,3 +554,33 @@ def like_post(request):
     response_data['likes'] = post.likes
     return HttpResponse(json.dumps(response_data), 
            content_type='application/json')
+
+def about(request):
+    context = {}
+    return render(request, 'forum/about.html', context)
+
+def contact(request):
+    context = {}
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            #clean_msg = bleach.clean(form.message)
+            cd = form.cleaned_data
+            msg = cd['message']
+            email = cd['email']
+            # consider adding a subject fiedl
+            #TODO code to send email goes here*
+            # Then decide whether to redirect to home or some success page.
+            # perhaps return success=True, then in the template, if success:
+            # create a JS function that spawns an alert or dialog when page is
+            # loaded. after "ok" is clicked, then it redirects to home.??
+    else:
+        form = ContactForm()
+    context['form'] = form
+    return render(request, 'forum/contact.html', context)
+
+
+
+
+
+

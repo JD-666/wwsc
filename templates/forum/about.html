@@ -1,0 +1,15 @@
+{% extends 'forum/base.html' %}
+{% block title %}About{% endblock title %}
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
+{% block breadcrumbs %}
+   <li class="breadcrumb-item"><a href="{% url 'categories' %}">WWSC</a></li>
+   <li class="breadcrumb-item active">About</li>
+{% endblock breadcrumbs %}
+{% block content %}
+<h3>About</h3>
+<p>A paragraph about what this site is.</p>
+<ul>
+    <li>Link to contact page.</li>
+    <li>Link to anywhere else?</li>
+</ul>
+{% endblock content %}
