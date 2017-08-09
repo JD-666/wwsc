@@ -11,7 +11,7 @@ urlpatterns =[
     url(r'^ajax_login/$', views.ajax_login, name='ajax_login'),
     url(r'^register/$', views.register_user, name='register'),
     url(r'^about/$', views.about, name='about'),
-    url(r'^conact/$', views.contact, name='contact'),
+    url(r'^contact/$', views.contact, name='contact'),
     url(r'^profile/(?P<username>[\w]+)/$', views.profile, name='profile'),
     url(r'^profile/(?P<username>[\w]+)/conversations/$', views.conversations,
         name='conversations'),

@@ -7,11 +7,25 @@
    <li class="breadcrumb-item active">Contact</li>
 {% endblock breadcrumbs %}
 {% block content %}
+<div class="row">
+<div class="col-md-3 col-sm-2 col-xs-1"></div>
+<div class="col-md-6 col-sm-8 col-xs-10">
 <h3>Contact</h3>
 <p>A short blurb about sending us feedback. Mention how it can be anonymous or you can leave a reply email.</p>
 <p>Render textarea form. and optional email field</p>
-<form action="{% url 'contact' %}" method="POST">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
+<form class="form-horizontal" action="{% url 'contact' %}" method="POST">{% csrf_token %}
+    <label class="control-label" for="{{ form.message.auto_id }}">{{ form.message.label }}:</label>
+    <div>{{ form.message }}</div>
+    {% if form.message.errors %}<span class="text-danger">{{ form.message.errors }}</span>{% endif %}
+    </br>
+    <p>Talk about how email is optional</p>
+    <label class="control-label" for="{{ form.email.auto_id }}">{{ form.email.label }}:</label>
+    <div>{{ form.email }}</div>
+    {% if form.email.errors %}<span class="text-danger">{{ form.email.errors }}</span>{% endif %}
+    </br>
+    <button type="submit" class="save btn">Submit</button>
 </form>
+</div>
+<div class="col-md-3 col-sm-2 col-xs-1"></div>
+</div>
 {% endblock content %}

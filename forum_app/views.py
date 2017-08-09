@@ -6,6 +6,7 @@ from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.mail import send_mail, mail_admins
 
 from datetime import datetime
 import json
@@ -568,12 +569,14 @@ def contact(request):
             cd = form.cleaned_data
             msg = cd['message']
             email = cd['email']
-            # consider adding a subject fiedl
-            #TODO code to send email goes here*
-            # Then decide whether to redirect to home or some success page.
-            # perhaps return success=True, then in the template, if success:
-            # create a JS function that spawns an alert or dialog when page is
-            # loaded. after "ok" is clicked, then it redirects to home.??
+            subject = 'WWSC User'
+            if email:
+                msg = msg + "\n\n REPLY TO: {}".format(email)
+            else:
+                msg = msg + "\n\n ANONYMOUS MESSAGE"
+            mail_admins(subject, msg, fail_silently=False)
+            context['email'] = email
+            return render(request, 'forum/contact_success.html', context)
     else:
         form = ContactForm()
     context['form'] = form

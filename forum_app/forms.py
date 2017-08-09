@@ -75,4 +75,7 @@ class ContactForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ContactForm, self).__init__(*args, **kwargs)
         self.fields['message'].widget.attrs.update(
-            {'placeholder':'message'})
+            {'placeholder':'message',
+             'rows':'15',
+             'cols':'75'})
+
