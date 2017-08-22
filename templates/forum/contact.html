@@ -1,0 +1,33 @@
+
+{% extends 'forum/base.html' %}
+{% block title %}Contact{% endblock title %}
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
+{% block breadcrumbs %}
+   <li class="breadcrumb-item"><a href="{% url 'categories' %}">WWSC</a></li>
+   <li class="breadcrumb-item active">Contact</li>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="row">
+<div class="col-md-3 col-sm-2 col-xs-1"></div>
+<div class="col-md-6 col-sm-8 col-xs-10">
+<h2>Contact</h2>
+<p>Send us a message!</p>
+<p>If you'd like us to get back to you, simply leave your 
+   email in the form below and we'll be sure to message you back.</p>
+<p>Otherwise anonymous feedback is welcome too!</p>
+<form class="form-horizontal" action="{% url 'contact' %}" method="POST">{% csrf_token %}
+    <label class="control-label" for="{{ form.message.auto_id }}">{{ form.message.label }}:</label>
+    <div>{{ form.message }}</div>
+    {% if form.message.errors %}<span class="text-danger">{{ form.message.errors }}</span>{% endif %}
+    </br>
+    <p>Leave us a reply email if you'd like a response.</p>
+    <label class="control-label" for="{{ form.email.auto_id }}">{{ form.email.label }}:</label>
+    <div>{{ form.email }}</div>
+    {% if form.email.errors %}<span class="text-danger">{{ form.email.errors }}</span>{% endif %}
+    </br>
+    <button type="submit" class="save btn">Submit</button>
+</form>
+</div>
+<div class="col-md-3 col-sm-2 col-xs-1"></div>
+</div>
+{% endblock content %}

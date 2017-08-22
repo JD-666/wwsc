@@ -1,0 +1,22 @@
+{% extends 'forum/base.html' %}
+{% block title %}Contact{% endblock title %}
+{% block searchbar-class %}hidden{% endblock searchbar-class %}
+ {% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'categories' %}">WWSC</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'contact' %}">Contact</a></li>
+    <li class="breadcrumb-item active">success</li>
+ {% endblock breadcrumbs %}
+{% block content %}
+<div style="text-align:center;">
+<h2>Success!</h2>
+{% if email %}
+    <h4>Your message has been submitted to the WWSC team.</h4>
+    <p>We will reply to <em>{{ email }}</em> as soon as we can.</p>
+{% else %}
+    <h4>Your anonymouse message has been submitted to the WWSC team.</h4>
+    <p>We always appreciate honest feedback. It helps us improve the experience for everyone.</p>
+{% endif %}
+</br>
+<p>Thanks - WWSC Team</p>
+</div>
+{% endblock content %}

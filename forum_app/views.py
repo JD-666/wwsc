@@ -6,6 +6,7 @@ from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.mail import send_mail, mail_admins
 
 from datetime import datetime
 import json
@@ -13,7 +14,8 @@ from markdown import markdown
 import bleach
 
 from forum_app.models import Category, Thread, Post, User, Profile, Conversation, Pm
-from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm, PostForm, PmForm
+from forum_app.forms import UserForm, ProfileForm, CategoryForm, ThreadForm
+from forum_app.forms import PostForm, PmForm, ContactForm
 
 
 def category_list(request):
@@ -93,6 +95,7 @@ def thread(request, category_slug, thread_slug):
         context['form'] = form
 
     post_list = thread.post_set.all().order_by('created_date')
+    initial_post = post_list[0]
     paginator = Paginator(post_list, 50) # show 10 posts per page
     if 'page' in request.GET:
         page = request.GET.get('page')
@@ -108,6 +111,7 @@ def thread(request, category_slug, thread_slug):
         posts = paginator.page(paginator.num_pages)
     context['paginator'] = paginator
     context['posts'] = posts
+    context['initial_post'] = initial_post
     context['thread'] = thread
     context['category'] = category
     return render(request, 'forum/thread.html', context)
@@ -415,11 +419,13 @@ def conversations(request, username):
         threads - a list of Thread objects
         category - a Category object
     """
+    print("In conversations()")
+    user = get_object_or_404(User, username=username)
     context = {}
     user = get_object_or_404(User, username=username)
     if request.user != user:
         raise Http404
-    conversation_list = Conversation.objects.filter(belongs_to=user)
+    conversation_list = Conversation.objects.filter(belongs_to=user).order_by('-most_recent_pm','-pk')
     paginator = Paginator(conversation_list, 100) # show 10 conversations per page
     if 'page' in request.GET:
         page = request.GET.get('page')
@@ -432,7 +438,6 @@ def conversations(request, username):
     context['paginator'] = paginator
     context['conversations'] = conversations
     context['user'] = user
-    #return redirect(reverse('categories'))
     return render(request, 'forum/conversations.html', context)
 
 @login_required
@@ -444,6 +449,8 @@ def conversation(request, username, is_with):
     context = {}
     user = get_object_or_404(User, username=username)
     is_with = get_object_or_404(User, username=is_with)
+    if request.user != user:
+        raise Http404
     if request.user == is_with:
         raise Http404
     try: # get current convo if it exists with user (but don't create one if not)
@@ -503,3 +510,80 @@ def conversation(request, username, is_with):
         context['paginator'] = paginator
         context['pms'] = pms
     return render(request, 'forum/conversation.html', context)
+
+@login_required
+def delete_conversation(request, username, is_with):
+    """ 
+    """
+    print("In delete_conversation()")
+    user = get_object_or_404(User, username=username)
+    is_with = get_object_or_404(User, username=is_with)
+    if request.user != user:
+        raise Http404
+    try:
+        conversation = Conversation.objects.get(belongs_to=user, is_with=is_with)
+        print("conversation = {}".format(conversation)) 
+    except Conversation.DoesNotExist:
+        pass
+    else:
+        conversation.delete()
+    finally:
+        return redirect('conversations',username=str(username))
+
+
+def like_post(request):
+    """ Called by an Ajax POST request. Returns a json object.
+    """
+    user_pk = request.POST.get('user_pk','') # defaults to '' 
+    post_pk = request.POST.get('post_pk','')
+    the_type = request.POST.get('type', 'like')
+    response_data = {}
+    user = get_object_or_404(User,pk=int(user_pk))
+    post = get_object_or_404(Post,pk=int(post_pk))
+    print(post.liked_by.all())
+    if user in post.liked_by.all():
+        print("I have already liked this post!!!")
+    else:
+        print("I have not yet liked this post!!!")
+        if the_type == 'like':
+            post.like(user)
+        elif the_type == 'dislike':
+            post.dislike(user)
+        post.save()
+
+    response_data['post_pk'] = post.pk
+    response_data['likes'] = post.likes
+    return HttpResponse(json.dumps(response_data), 
+           content_type='application/json')
+
+def about(request):
+    context = {}
+    return render(request, 'forum/about.html', context)
+
+def contact(request):
+    context = {}
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            #clean_msg = bleach.clean(form.message)
+            cd = form.cleaned_data
+            msg = cd['message']
+            email = cd['email']
+            subject = 'WWSC User'
+            if email:
+                msg = msg + "\n\n REPLY TO: {}".format(email)
+            else:
+                msg = msg + "\n\n ANONYMOUS MESSAGE"
+            mail_admins(subject, msg, fail_silently=False)
+            context['email'] = email
+            return render(request, 'forum/contact_success.html', context)
+    else:
+        form = ContactForm()
+    context['form'] = form
+    return render(request, 'forum/contact.html', context)
+
+
+
+
+
+

@@ -31,6 +31,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1','jd666.pythonanywhere.com']
 
+# Email settings
+ADMINS = [('Jack','john.dituro@gmail.com'),]
+SERVER_EMAIL = 'jdituro@masonlive.gmu.edu'
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_HOST_USER = 'jdituro@masonlive.gmu.edu'
+EMAIL_HOST_PASSWORD = os.environ['MY_SECRET_EMAIL_PASS']
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 
 # Application definition
 

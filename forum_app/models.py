@@ -114,6 +114,7 @@ class Thread(models.Model):
         self.slug = slugify(self.name)
         self.category.num_threads += 1
         self.author.profile.rank += 5
+        self.author.profile.save()
         self.save(*args, **kwargs)
         return
 
@@ -129,26 +130,34 @@ class Post(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
     likes = models.IntegerField(default=0)
+    liked_by = models.ManyToManyField(User,related_name='liked_by')
 
     def new(self, *args, **kwargs):
         self.thread.most_recent_post = self.created_date
         self.thread.num_posts += 1
         self.thread.category.most_recent_post = self.created_date
         self.thread.category.num_posts += 1
+        self.author.profile.rank += 1
         self.thread.save()
         self.thread.category.save()
-        self.author.profile.rank += 1
+        self.author.profile.save()
         self.save(*args, **kwargs)
         return
 
-    def like(self):
+    def like(self, user):
         self.likes += 1
         self.author.profile.rank += 1
+        self.liked_by.add(user)
+        self.author.profile.save()
+        self.save()
         return
 
-    def dislike(self):
+    def dislike(self, user):
         self.likes -= 1
         self.author.profile.rank -= 1
+        self.liked_by.add(user)
+        self.author.profile.save()
+        self.save()
         return
 
     def __str__(self):
@@ -162,6 +171,10 @@ class Conversation(models.Model):
     """
     belongs_to = models.ForeignKey(User, related_name='conversation_belongs_to')
     is_with = models.ForeignKey(User, related_name='conversation_is_with')
+    most_recent_pm = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return str(self.is_with)
 
 
 class Pm(models.Model):
@@ -174,6 +187,12 @@ class Pm(models.Model):
     author = models.ForeignKey(User)
     created_date = models.DateTimeField(default=timezone.now)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.conversation.most_recent_pm = self.created_date
+        self.conversation.save()
+        super(Pm, self).save()
+        return
 
     class Meta:
         ordering = ['created_date']

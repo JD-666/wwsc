@@ -1,5 +1,5 @@
 {% extends 'forum/base.html' %}
-{% block title %} posts{% endblock title %}
+{% block title %}posts{% endblock title %}
 {% block searchbar-class %}hidden{% endblock searchbar-class %}
 <!-- block to update value property of element -->
 {% block breadcrumbs %}
@@ -17,8 +17,23 @@
  <div id="search-results">
     {% for post in posts %}
         {% spaceless %}
-        <div class="well well-sm">{% if forloop.first %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
-        <div class="post-meta small text-muted">{{ post.author }} | {{ post.created_date }} {% if user.is_authenticated %}| <a href="{% url 'conversation' request.user post.author %}">message</a>{% endif %}</div>
+        <div class="well well-sm">{% if forloop.first and post == initial_post %}<h2 class="thread-header">{{ post.thread.name }}</h2>{% endif %}{{ post.text|safe }}
+          <div class="post-meta small text-muted">
+            <span id="left-post-meta">
+              {{ post.author }} | rank {{ post.author.profile.rank }} | {{ post.created_date }}
+              {% if user.is_authenticated and user != post.author %} | 
+                <a href="{% url 'conversation' request.user post.author %}"><i class="fa fa-envelope-o" aria-hidden="true"></i></a> 
+              {% endif %}
+            </span>
+            <span id="right-post-meta">
+                {% if user.is_authenticated and not user in post.liked_by.all and user != post.author %}
+                  <span id="{{ post.id }}-like">
+                    <a href="#" onclick="like_post({{ post.pk }}, 'like')"><span class="glyphicon glyphicon-thumbs-up"></span></a> 
+                    <a style="margin-left:10px;" href="#" onclick="like_post({{ post.pk }},'dislike')"><span class="glyphicon glyphicon-thumbs-down"></span></a>
+                  </span>
+                {% endif %}
+              <span style="padding-left:15px;" id="{{ post.id }}"> {{ post.likes }}</span></div>
+            </span>
         </div>
         {% endspaceless %}
     {% endfor %}
@@ -65,5 +80,29 @@
         placeholder:"Message",
         forceSync:true,
     });
+function like_post(pk, type) {
+    /* Uses Ajax to send POST information to be processed by a view. The view
+    sends back a json object with a string in jason.result.
+    "pk" is the primary-key of the specific post where the like was clicked.
+    "type" specifies whether this was a (like or dislike) */
+    $.ajax({
+        type: "POST",
+        url: "/forum/like-post/",
+        datatype: "json",
+        async: true,
+        data: {
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            user_pk: {{ user.pk }},
+            post_pk: pk,
+            type: type,
+            //post_pk: $('#post_id').val(),
+        },
+        success: function (json) {
+            $('#'+json.post_pk).html(json.likes);
+            $('#'+json.post_pk+'-like').hide();
+        }
+    });
+    //$('#login-result-div').html('<div id="login-result" class="alert alert-info"><p>Attempting to login...</p></div>');
+}
 </script>
 {% endblock content %}
